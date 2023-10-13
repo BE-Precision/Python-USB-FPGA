@@ -2,7 +2,7 @@ import tkinter as tk
 import serial
 import threading
 
-serial_port = 'COM18'
+serial_port = 'COM24'
 
 # Function to be called when the button is clicked
 def button_click():
@@ -12,7 +12,7 @@ def button_click():
 
 def serial_open():
     global ser
-    ser = serial.Serial(serial_port, baudrate=9600)
+    ser = serial.Serial(serial_port, baudrate=115200)
 
 def serial_close():
     ser.close()
