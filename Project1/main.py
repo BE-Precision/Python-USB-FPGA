@@ -13,7 +13,7 @@ def button_click():
 
 def serial_open():
     global ser
-    ser = serial.Serial(serial_port, baudrate=9600)
+    ser = serial.Serial(serial_port, baudrate=115200)
 
 def serial_close():
     ser.close()
@@ -29,14 +29,16 @@ def send_and_receive_data():
         start_time = time.time()  # Start the timer
         with open(file_path) as csv_file:
             global ser
-            ser = serial.Serial(serial_port, baudrate=9600)
+            #ser = serial.Serial(serial_port, baudrate=115200)
             csv_reader = csv.reader(csv_file, delimiter=';')
             for row in csv_reader:
-                ser.write(row[0].encode())
+                c = row[0]
+                print(c)
+                #ser.write(row[0].encode())
                 #response = ser.read(len(row[0].encode()))
                 #response_decoded = response.decode('utf-8')
                 #print(response)
-            ser.close()
+            #ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
