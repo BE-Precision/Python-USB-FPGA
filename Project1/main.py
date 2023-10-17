@@ -11,17 +11,20 @@ serial_port = 'COM24'
 def button_click():
     threading.Thread(target=send_and_receive_data).start()
 
-def serial_open():
-    global ser
-    ser = serial.Serial(serial_port, baudrate=115200)
-
-def serial_close():
-    ser.close()
-    #test comment for commit
-
 def selectFile():
    global file_path
    file_path = filedialog.askopenfilename()
+
+def convert_to_binary(number):
+    # Functie om een getal naar een binaire representatie om te zetten
+    binary_str = bin(int(number))[2:]
+    return binary_str
+
+def swap_last_two_bits(binary_str):
+    # Functie om de laatste twee bits van een binaire string om te wisselen
+    if len(binary_str) >= 2:
+        return binary_str[:-2] + binary_str[-1] + binary_str[-2]
+    return binary_str
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
@@ -32,11 +35,19 @@ def send_and_receive_data():
             ser = serial.Serial(serial_port, baudrate=921600)
             csv_reader = csv.reader(csv_file, delimiter=';')
             for row in csv_reader:
-              
-                ser.write(row[0].encode())
-                #response = ser.read(len(row[0].encode()))
-                #response_decoded = response.decode('utf-8')
-                #print(response)
+                if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
+                    num1 = row[0]
+                    num2 = row[1]
+
+                    # Zet de getallen om naar binaire representaties
+                    binary_num1 = convert_to_binary(num1)
+                    binary_num2 = convert_to_binary(num2)
+
+                    # Combineer de binaire getallen
+                    combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
+
+                    # Stuur de gecombineerde binaire gegevens naar de seriële poort
+                    ser.write(combined_binary.encode())
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
@@ -59,14 +70,6 @@ button.pack()
 
 # Create file selection button
 button = tk.Button(root, text="Select File", command=selectFile)
-button.pack()
-
-# Create serial open button
-button = tk.Button(root, text="Open Serial", command=serial_open)
-button.pack()
-
-# Create file selection button
-button = tk.Button(root, text="Serial Close", command=serial_close)
 button.pack()
 
 # Create a label
