@@ -12,7 +12,7 @@ def button_click():
 
 def serial_open():
     global ser
-    ser = serial.Serial(serial_port, baudrate=115200)
+    ser = serial.Serial(serial_port, baudrate=1843200)
 
 def serial_close():
     ser.close()
@@ -20,13 +20,13 @@ def serial_close():
 # Function to send and receive data in a separate thread
 def send_and_receive_data(x1):
     try:
-        print(2)
+        #print(2)
         ser.write(x1.encode())
-        print(3)
+       # print(3)
         x2 = ser.read(len(x1))
-        print(4)
+       # print(4)
         label.config(text=x2.decode())  # Decode received bytes to string
-        print(5)
+       # print(5)
     except serial.SerialException as e:
         label.config(text=f"Error: {str(e)}")
 

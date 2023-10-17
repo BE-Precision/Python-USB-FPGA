@@ -11,32 +11,59 @@ serial_port = 'COM24'
 def button_click():
     threading.Thread(target=send_and_receive_data).start()
 
-def serial_open():
-    global ser
-    ser = serial.Serial(serial_port, baudrate=115200)
-
-def serial_close():
-    ser.close()
-    #test comment for commit
-
 def selectFile():
    global file_path
    file_path = filedialog.askopenfilename()
+
+def convert_to_binary(number):
+    # Functie om een getal naar een binaire representatie om te zetten
+    binary_str = bin(int(number))[2:]
+    return binary_str
+
+def convert_to_binary2(number):
+    # Functie om een getal naar een binaire representatie om te zetten
+    binary_str = format(int(number), '02b')  # Zorg voor een binaire reeks van 2 bits
+    return binary_str
+
+def swap_last_two_bits(binary_str):
+    # Functie om de laatste twee bits van een binaire string om te wisselen
+    if len(binary_str) >= 2:
+        return binary_str[:-2] + binary_str[-1] + binary_str[-2]
+    return binary_str
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
         start_time = time.time()  # Start the timer
-        with open(file_path) as csv_file:
+        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
             global ser
-            ser = serial.Serial(serial_port, baudrate=921600)
+            ser = serial.Serial(serial_port, baudrate=1843200)
             csv_reader = csv.reader(csv_file, delimiter=';')
+            
+            myBytes = bytearray()
+            
             for row in csv_reader:
-              
-                ser.write(row[0].encode())
-                #response = ser.read(len(row[0].encode()))
-                #response_decoded = response.decode('utf-8')
-                #print(response)
+                if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
+                    num1 = row[0]
+                    num2 = row[1]
+
+                    # Zet de getallen om naar binaire representaties
+                    binary_num1 = convert_to_binary(num1)
+                    binary_num2 = convert_to_binary2(num2)
+
+                    # Combineer de binaire getallen
+                    combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
+                    myBytes.append(int(combined_binary, 2))
+
+                                             
+                    # Stuur de gecombineerde binaire gegevens naar de seriële poort
+                    ser.write(myBytes)
+                    myBytes.clear()
+                    
+
+                    print(combined_binary)
+                    time.sleep(2)
+                    
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
@@ -61,17 +88,12 @@ button.pack()
 button = tk.Button(root, text="Select File", command=selectFile)
 button.pack()
 
-# Create serial open button
-button = tk.Button(root, text="Open Serial", command=serial_open)
-button.pack()
-
-# Create file selection button
-button = tk.Button(root, text="Serial Close", command=serial_close)
-button.pack()
-
 # Create a label
 label1 = tk.Label(root, text="Time Elapsed")
 label1.pack(pady=20)
+
+label2 = tk.Label(root, text="Serial message")
+label2.pack(pady=20)
 
 # Start the main loop
 root.mainloop()
