@@ -29,16 +29,15 @@ def send_and_receive_data():
         start_time = time.time()  # Start the timer
         with open(file_path) as csv_file:
             global ser
-            #ser = serial.Serial(serial_port, baudrate=115200)
+            ser = serial.Serial(serial_port, baudrate=921600)
             csv_reader = csv.reader(csv_file, delimiter=';')
             for row in csv_reader:
-                c = row[0]
-                print(c)
-                #ser.write(row[0].encode())
+              
+                ser.write(row[0].encode())
                 #response = ser.read(len(row[0].encode()))
                 #response_decoded = response.decode('utf-8')
                 #print(response)
-            #ser.close()
+            ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
