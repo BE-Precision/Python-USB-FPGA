@@ -119,10 +119,6 @@ def convert_data(num1, num2):
     myBytes.append(int(combined_binary, 2))
     return myBytes
 
-def update_squares(num1, num2):
-    switch_states[int(num1)] = num2  # Werk de schakelstand bij
-    update_square_colors()
-
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
@@ -139,14 +135,16 @@ def send_and_receive_data():
 
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
-                    
+                    switch_states[int(num1)] = num2  # Werk de schakelstand bij
 
                     #time.sleep(2)
-
+            
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
+            update_square_colors()
+
     except serial.SerialException as e:
          label.config(text=f"Error {str(e)}")
 
