@@ -121,7 +121,7 @@ def convert_data(num1, num2):
     # Combineer de binaire getallen
     combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
 
-    display_data_on_labels(num1, num2, combined_binary)
+    #display_data_on_labels(num1, num2, combined_binary)
 
     myBytes = bytearray()
     
@@ -165,14 +165,17 @@ def send_manual_data():
     try:
         start_time = time.time()  # Start the timer
         ser = serial.Serial(serial_port, baudrate=1843200)
-
+    
         num1 = entry_num1.get()
         num2 = entry_num2.get()
-
+        updateList.append(int(num1))
+        colourList.append(int(num2))
         # Stuur de gecombineerde binaire gegevens naar de seriële poort
         ser.write(convert_data(num1, num2))
         
         update_square_colors()
+        updateList.clear()
+        colourList.clear()
         ser.close()
         end_time = time.time()  # Stop the timer
         elapsed_time = end_time - start_time
