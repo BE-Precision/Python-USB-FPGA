@@ -141,9 +141,6 @@ def send_and_receive_data():
                     ser.write(convert_data(num1, num2))
                     
 
-                    threading.Tread(target=update_squares(num1, num2)).start()
-                   
-
                     #time.sleep(2)
 
             ser.close()
@@ -155,20 +152,20 @@ def send_and_receive_data():
 
 # Function to send manually entered data
 def send_manual_data():
-    #try:
-        #ser = serial.Serial(serial_port, baudrate=1843200)
+    try:
+        ser = serial.Serial(serial_port, baudrate=1843200)
 
         num1 = entry_num1.get()
         num2 = entry_num2.get()
 
         # Stuur de gecombineerde binaire gegevens naar de seriële poort
-        #ser.write(convert_data(num1, num2))
-        convert_data(num1, num2)
+        ser.write(convert_data(num1, num2))
+        
         switch_states[int(num1)] = num2  # Werk de schakelstand bij
         update_square_colors()
-        #ser.close()
-    #except serial.SerialException as e:
-        #label.config(text=f"Error {str(e)}")
+        ser.close()
+    except serial.SerialException as e:
+        label.config(text=f"Error {str(e)}")
 
 # Create the main window
 root = tk.Tk()
