@@ -11,7 +11,7 @@ import time
 COLORS = ["blue", "red", "green", "purple"]
 
 serial_port = 'COM24'
-grid_rows = 10
+grid_rows = 300
 grid_columns = 100
 group_size = 1000  # Grootte van elke groep vierkantjes
 grid_size = grid_rows * grid_columns
@@ -22,14 +22,18 @@ num_groups = grid_size // group_size
 # Schakelstanden voor elk vierkantje
 switch_states = [0] * (grid_rows * grid_columns)
 
-#Lijst om te updaten squares bij te houden
+# Lijst om bij te houden welke squares moeten worden geüpdatet en hun kleur
 updateList = []
 colourList = []
 
+def resize_canvas_to_group():
+    canvas_height = square_size*group_size/grid_rows*3
+    canvas.configure(scrollregion=canvas.bbox("all"), height=canvas_height)
+
 # Functie om vierkantkleuren bij te werken
-def update_square_colors(updateList, colourList):
+def update_square_colors():
     for i in updateList:
-        canvas.itemconfig(updateList[i], fill=COLORS[int(colourList[i])])
+        canvas.itemconfig(i, fill=COLORS[colourList[i]])
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -83,8 +87,8 @@ def button_click():
     threading.Thread(target=send_and_receive_data).start()
 
 def selectFile():
-   global file_path
-   file_path = filedialog.askopenfilename()
+    global file_path
+    file_path = filedialog.askopenfilename()
 
 def convert_to_binary(number):
     # Functie om een getal naar een binaire representatie om te zetten
@@ -108,7 +112,7 @@ def display_data_on_labels(switch_num, signal_num, binary_data):
     label6.config(text=f"Binary data: {binary_data}")
 
 def convert_data(num1, num2):
-    # Functie om de data achterelkaar te plakken in de juiste volgorde
+    # Functie om de data achter elkaar te plakken in de juiste volgorde
 
     # Zet de getallen om naar binaire representaties
     binary_num1 = convert_to_binary(num1)
@@ -121,14 +125,11 @@ def convert_data(num1, num2):
 
     myBytes = bytearray()
     
-    
     for i in range(0, len(combined_binary), 8):
         chunk = combined_binary[i:i + 8]
         myBytes.append(int(chunk, 2))
     
     return myBytes
-
-
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
@@ -149,13 +150,11 @@ def send_and_receive_data():
                     ser.write(convert_data(num1, num2))
                     switch_states[int(num1)] = num2  # Werk de schakelstand bij
 
-                    #time.sleep(2)
-            
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
-            update_square_colors(updateList, colourList)
+            update_square_colors()
             updateList.clear()
             colourList.clear()
 
@@ -219,7 +218,7 @@ canvas_width = grid_columns * square_size
 canvas_height = grid_rows * square_size
 
 # Create a canvas for the grid of squares
-canvas = tk.Canvas(big_frame, width=canvas_width, height=canvas_height, bg="white")
+canvas = tk.Canvas(big_frame, width=canvas_width, height=square_size*group_size/grid_rows*3, bg="white")
 canvas.pack()
 
 # Create square objects
@@ -231,7 +230,7 @@ for i in range(grid_rows):
         y0 = i * square_size
         x1 = x0 + square_size
         y1 = y0 + square_size
-        square = canvas.create_rectangle(x0, y0, x1, y1, fill="blue", state="normal")
+        square = canvas.create_rectangle(x0, y0, x1, y1, fill="blue", state="hidden")
 
         # Voeg de widget toe aan de lijst
         square_widgets.append(square)
@@ -307,12 +306,14 @@ def next_group():
     global current_group
     current_group = (current_group + 1) % num_groups
     show_current_group()
+    resize_canvas_to_group()
 
 # Functie om naar de vorige groep te schakelen
 def previous_group():
     global current_group
     current_group = (current_group - 1) % num_groups
     show_current_group()
+    resize_canvas_to_group()
 
 # Voeg knoppen toe om tussen groepen te schakelen
 next_group_button = tk.Button(big_frame, text="Next Group", command=next_group)
