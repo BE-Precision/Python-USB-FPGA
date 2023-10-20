@@ -116,7 +116,12 @@ def convert_data(num1, num2):
     display_data_on_labels(num1, num2, combined_binary)
 
     myBytes = bytearray()
-    myBytes.append(int(combined_binary, 2))
+    
+    
+    for i in range(0, len(combined_binary), 8):
+        chunk = combined_binary[i:i + 8]
+        myBytes.append(int(chunk, 2))
+    
     return myBytes
 
 # Function to send and receive data in a separate thread
