@@ -10,7 +10,7 @@ import time
 # Constanten voor de kleuren
 COLORS = ["blue", "red", "green", "purple"]
 
-serial_port = 'COM15'
+serial_port = 'COM24'
 grid_rows = 300
 grid_columns = 100
 group_size = 1000  # Grootte van elke groep vierkantjes
@@ -105,8 +105,6 @@ def display_data_on_labels(switch_num, signal_num, binary_data):
 
 def convert_data(num1, num2):
     # Functie om de data achterelkaar te plakken in de juiste volgorde
-    num1 = entry_num1.get()
-    num2 = entry_num2.get()
 
     # Zet de getallen om naar binaire representaties
     binary_num1 = convert_to_binary(num1)
@@ -130,8 +128,6 @@ def send_and_receive_data():
             ser = serial.Serial(serial_port, baudrate=1843200)
             csv_reader = csv.reader(csv_file, delimiter=';')
 
-            myBytes = bytearray()
-
             for row in csv_reader:
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
                     num1 = row[0]
@@ -139,7 +135,7 @@ def send_and_receive_data():
 
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
-                    myBytes.clear()
+                    
 
                     time.sleep(2)
 
