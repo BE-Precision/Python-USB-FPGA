@@ -11,7 +11,7 @@ import time
 COLORS = ["blue", "red", "green", "purple"]
 
 serial_port = 'COM24'
-grid_rows = 300
+grid_rows = 10
 grid_columns = 100
 group_size = 1000  # Grootte van elke groep vierkantjes
 grid_size = grid_rows * grid_columns
@@ -22,10 +22,14 @@ num_groups = grid_size // group_size
 # Schakelstanden voor elk vierkantje
 switch_states = [0] * (grid_rows * grid_columns)
 
+#Lijst om te updaten squares bij te houden
+updateList = []
+colourList = []
+
 # Functie om vierkantkleuren bij te werken
-def update_square_colors():
-    for i, color_id in enumerate(switch_states):
-        canvas.itemconfig(square_ids[i], fill=COLORS[int(color_id)])
+def update_square_colors(updateList, colourList):
+    for i in updateList:
+        canvas.itemconfig(updateList[i], fill=COLORS[int(colourList[i])])
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -124,6 +128,8 @@ def convert_data(num1, num2):
     
     return myBytes
 
+
+
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
@@ -137,7 +143,8 @@ def send_and_receive_data():
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
                     num1 = row[0]
                     num2 = row[1]
-
+                    updateList.append(int(row[0]))
+                    colourList.append(int(row[1]))
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
                     switch_states[int(num1)] = num2  # Werk de schakelstand bij
@@ -148,7 +155,9 @@ def send_and_receive_data():
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
-            update_square_colors()
+            update_square_colors(updateList, colourList)
+            updateList.clear()
+            colourList.clear()
 
     except serial.SerialException as e:
          label.config(text=f"Error {str(e)}")
