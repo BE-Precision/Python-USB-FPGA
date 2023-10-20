@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import *
 from tkinter import ttk
+from tkinter import StringVar
 import serial
 import threading
 import csv
@@ -10,24 +11,25 @@ import time
 # Constanten voor de kleuren
 COLORS = ["blue", "red", "green", "purple"]
 
-serial_port = 'COM24'
-grid_rows = 300
-grid_columns = 100
-group_size = 1000  # Grootte van elke groep vierkantjes
-grid_size = grid_rows * grid_columns
+serial_port = 'COM15'
+grid_columns = 50
+group_size = 250  # Grootte van elke groep vierkantjes
+modules = 120
+grid_size = group_size*modules
+grid_rows=int(grid_size/grid_columns)
 square_size = 15  # Grootte van elk vierkantje
 # Bereken het aantal groepen
 num_groups = grid_size // group_size
 
 # Schakelstanden voor elk vierkantje
-switch_states = [0] * (grid_rows * grid_columns)
+switch_states = [0] * (grid_size)
 
 # Lijst om bij te houden welke squares moeten worden geüpdatet en hun kleur
 updateList = []
 colourList = []
 
 def resize_canvas_to_group():
-    canvas_height = square_size*group_size/grid_rows*3
+    canvas_height = square_size*(group_size/grid_columns)
     canvas.configure(scrollregion=canvas.bbox("all"), height=canvas_height)
 
 # Functie om vierkantkleuren bij te werken
@@ -47,7 +49,7 @@ def hide_square_tooltip(event):
 # Functie om een tooltip voor een specifiek vierkant weer te geven
 def show_square_tooltip_for_square(event, square):
     x, y = event.x_root, event.y_root  # Gebruik x_root en y_root voor absolute schermcoördinaten
-    square_tooltip_text = f"Square {square}"
+    square_tooltip_text = f"Switch {square-1}"
 
     # Controleer eerst of er al een tooltip voor dit vierkant bestaat
     for tooltip in tooltips:
@@ -216,7 +218,7 @@ canvas_width = grid_columns * square_size
 canvas_height = grid_rows * square_size
 
 # Create a canvas for the grid of squares
-canvas = tk.Canvas(big_frame, width=canvas_width, height=square_size*group_size/grid_rows*3, bg="white")
+canvas = tk.Canvas(big_frame, width=canvas_width, height=square_size*(group_size/grid_columns), bg="white")
 canvas.pack()
 
 # Create square objects
@@ -313,14 +315,79 @@ def previous_group():
     show_current_group()
     resize_canvas_to_group()
 
-# Voeg knoppen toe om tussen groepen te schakelen
-next_group_button = tk.Button(big_frame, text="Next Group", command=next_group)
-next_group_button.pack()
-previous_group_button = tk.Button(big_frame, text="Previous Group", command=previous_group)
-previous_group_button.pack()
+# Voeg een functie toe om de huidige groep te wijzigen wanneer een nieuwe groep is geselecteerd in het dropdown-menu
+def on_group_selection_change(event):
+    global current_group
+    current_group = group_selection.get()
+    current_group = int(current_group)  # Zet de geselecteerde waarde om in een integer
+    show_current_group()  # Toon de bijgewerkte groep
+    resize_canvas_to_group()
+
+# Maak een StringVar voor de dropdown selectie
+group_selection = StringVar(root)
+group_selection.set(str(current_group))  # Stel de standaard selectie in op de huidige groep
+
+# Voeg een dropdown-menu toe
+label7 = tk.Label(big_frame, text="Module number:")
+label7.pack()
+group_dropdown = ttk.Combobox(big_frame, textvariable=group_selection, values=[str(i) for i in range(num_groups)])
+group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
+group_dropdown.pack()
 
 # Standaard weergave van de huidige groep
 show_current_group()
+
+# Voeg nieuwe labels en entry widgets toe om de parameters in te stellen
+label_grid_columns = tk.Label(big_frame, text="Grid Columns:")
+label_grid_columns.pack()
+entry_grid_columns = tk.Entry(big_frame)
+entry_grid_columns.insert(0, grid_columns)  # Stel de standaardwaarde in
+entry_grid_columns.pack()
+
+label_group_size = tk.Label(big_frame, text="Group Size:")
+label_group_size.pack()
+entry_group_size = tk.Entry(big_frame)
+entry_group_size.insert(0, group_size)  # Stel de standaardwaarde in
+entry_group_size.pack()
+
+label_modules = tk.Label(big_frame, text="Modules:")
+label_modules.pack()
+entry_modules = tk.Entry(big_frame)
+entry_modules.insert(0, modules)  # Stel de standaardwaarde in
+entry_modules.pack()
+
+label_square_size = tk.Label(big_frame, text="Square Size:")
+label_square_size.pack()
+entry_square_size = tk.Entry(big_frame)
+entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
+entry_square_size.pack()
+
+# Voeg een functie toe om de parameters bij te werken met de ingevoerde waarden
+def update_parameters():
+    global grid_columns, group_size, modules, square_size
+
+    # Haal de ingevoerde waarden op uit de entry widgets
+    grid_columns = int(entry_grid_columns.get())
+    group_size = int(entry_group_size.get())
+    modules = int(entry_modules.get())
+    square_size = int(entry_square_size.get())
+
+    # Bereken het aantal groepen en de grid-rijen opnieuw
+    global grid_size, num_groups, grid_rows
+    grid_size = group_size * modules
+    num_groups = grid_size // group_size
+    grid_rows = grid_size // grid_columns
+
+    # Pas de grootte van het canvas aan
+    canvas_width = grid_columns * square_size
+    canvas_height = grid_rows * square_size
+    canvas.config(width=canvas_width, height=canvas_height)
+    show_current_group()
+    resize_canvas_to_group()
+
+# Voeg een updateknop toe om de parameters bij te werken
+update_button = tk.Button(big_frame, text="Update Parameters", command=update_parameters)
+update_button.pack()
 
 # Start the main loop
 root.mainloop()
