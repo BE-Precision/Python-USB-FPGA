@@ -105,8 +105,6 @@ def display_data_on_labels(switch_num, signal_num, binary_data):
 
 def convert_data(num1, num2):
     # Functie om de data achterelkaar te plakken in de juiste volgorde
-    num1 = entry_num1.get()
-    num2 = entry_num2.get()
 
     # Zet de getallen om naar binaire representaties
     binary_num1 = convert_to_binary(num1)
@@ -140,8 +138,10 @@ def send_and_receive_data():
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
                     myBytes.clear()
+                    #switch_states[int(num1)] = num2  # Werk de schakelstand bij
+                    #update_square_colors()
 
-                    time.sleep(2)
+                    #time.sleep(2)
 
             ser.close()
             end_time = time.time()  # Stop the timer
