@@ -151,6 +151,7 @@ def send_and_receive_data():
 # Function to send manually entered data
 def send_manual_data():
     try:
+        start_time = time.time()  # Start the timer
         ser = serial.Serial(serial_port, baudrate=1843200)
 
         num1 = entry_num1.get()
@@ -162,6 +163,9 @@ def send_manual_data():
         switch_states[int(num1)] = num2  # Werk de schakelstand bij
         update_square_colors()
         ser.close()
+        end_time = time.time()  # Stop the timer
+        elapsed_time = end_time - start_time
+        label1.config(text=elapsed_time)
     except serial.SerialException as e:
         label.config(text=f"Error {str(e)}")
 
