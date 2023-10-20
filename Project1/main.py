@@ -10,7 +10,7 @@ import time
 # Constanten voor de kleuren
 COLORS = ["blue", "red", "green", "purple"]
 
-serial_port = 'COM15'
+serial_port = 'COM24'
 grid_rows = 300
 grid_columns = 100
 group_size = 1000  # Grootte van elke groep vierkantjes
@@ -127,8 +127,6 @@ def send_and_receive_data():
             global ser
             ser = serial.Serial(serial_port, baudrate=1843200)
             csv_reader = csv.reader(csv_file, delimiter=';')
-
-            myBytes = bytearray()
 
             for row in csv_reader:
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
