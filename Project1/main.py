@@ -119,6 +119,10 @@ def convert_data(num1, num2):
     myBytes.append(int(combined_binary, 2))
     return myBytes
 
+def update_squares(num1, num2):
+    switch_states[int(num1)] = num2  # Werk de schakelstand bij
+    update_square_colors()
+
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
@@ -135,9 +139,10 @@ def send_and_receive_data():
 
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
-                    myBytes.clear()
-                    #switch_states[int(num1)] = num2  # Werk de schakelstand bij
-                    #update_square_colors()
+                    
+
+                    threading.Tread(target=update_squares(num1, num2)).start()
+                   
 
                     #time.sleep(2)
 
