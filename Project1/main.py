@@ -11,16 +11,13 @@ import time
 COLORS = ["blue", "red", "green", "purple"]
 
 serial_port = 'COM24'
-grid_rows = 10
+grid_rows = 20
 grid_columns = 100
 group_size = 1000  # Grootte van elke groep vierkantjes
 grid_size = grid_rows * grid_columns
 square_size = 15  # Grootte van elk vierkantje
 # Bereken het aantal groepen
 num_groups = grid_size // group_size
-
-# Schakelstanden voor elk vierkantje
-switch_states = [0] * (grid_rows * grid_columns)
 
 #Lijst om te updaten squares bij te houden
 updateList = []
@@ -147,7 +144,6 @@ def send_and_receive_data():
                     colourList.append(int(row[1]))
                     # Stuur de gecombineerde binaire gegevens naar de seriële poort
                     ser.write(convert_data(num1, num2))
-                    switch_states[int(num1)] = num2  # Werk de schakelstand bij
 
                     #time.sleep(2)
             
@@ -174,7 +170,6 @@ def send_manual_data():
         # Stuur de gecombineerde binaire gegevens naar de seriële poort
         ser.write(convert_data(num1, num2))
         
-        switch_states[int(num1)] = num2  # Werk de schakelstand bij
         update_square_colors()
         ser.close()
         end_time = time.time()  # Stop the timer
