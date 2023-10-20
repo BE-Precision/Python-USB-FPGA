@@ -3,6 +3,7 @@ from tkinter import filedialog
 from tkinter import *
 from tkinter import ttk
 from tkinter import StringVar
+from tkinter import colorchooser
 import serial
 import threading
 import csv
@@ -246,6 +247,26 @@ for i in range(grid_rows):
         canvas.tag_bind(square, "<Enter>", lambda e, square_id=square: show_square_tooltip_for_square(e, square_id))
         canvas.tag_bind(square, "<Leave>", hide_square_tooltip)
         canvas.tag_bind(square, "<Motion>", update_square_tooltips)
+
+# Voeg gekleurde vakjes toe om de signalen weer te geven
+color_boxes = []
+colors = ["blue", "red", "green", "purple"]
+for i, color in enumerate(colors):
+    color_box = tk.Canvas(big_frame, width=30, height=30, bg=color)
+    color_box.pack(side="left")  # Use pack to place color boxes side by side
+    color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
+    color_boxes.append(color_box)
+
+# Functie om de kleur van een signaal te wijzigen
+def change_signal_color(signal):
+    # Use the colorchooser module to pick a color
+    color = colorchooser.askcolor()[1]
+
+    # Check if a color was selected (user didn't cancel the dialog)
+    if color:
+        colors[signal] = color
+        COLORS[signal] = color
+        color_boxes[signal].configure(bg=color)  # Update the color of the box
 
 # Create a button
 button = tk.Button(big_frame, text="Send!", command=button_click)
