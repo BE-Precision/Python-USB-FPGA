@@ -26,9 +26,15 @@ num_groups = grid_size // group_size
 # Schakelstanden voor elk vierkantje
 switch_states = [0] * (grid_size)
 
+
+# Standaardkleur voor elk vierkant
+default_color = 0  # Je kunt dit aanpassen aan je voorkeur
+
+# Initialiseer de colourList met standaardkleuren voor alle vierkanten
+colourList = []
+
 # Lijst om bij te houden welke squares moeten worden geüpdatet en hun kleur
 updateList = []
-colourList = []
 
 # Lijst om de huidige kleur van elk vierkant bij te houden
 current_square_colors = ["blue"] * grid_size
@@ -280,6 +286,11 @@ for i, color in enumerate(colors):
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
 
+def update_all_square_colors():
+    for i in range(len(square_widgets)):
+        square_id = square_widgets[i]
+        canvas.itemconfig(square_id, fill=COLORS[colourList[i]])
+
 # Functie om de kleur van een signaal te wijzigen
 def change_signal_color(signal):
     # Use the colorchooser module to pick a color
@@ -287,16 +298,18 @@ def change_signal_color(signal):
 
     # Check if a color was selected (user didn't cancel the dialog)
     if color:
+        old_color = COLORS[signal]
         colors[signal] = color
         COLORS[signal] = color
         color_boxes[signal].configure(bg=color)  # Update the color of the box
 
-        # Update the color for all squares that use this signal
-        for i in range(len(colourList)):
-            if colourList[i] == signal:
-                canvas.itemconfig(updateList[i], fill=color)
-                current_square_colors[updateList[i]] = color
-                
+        # Werk de kleur van de vierkanten bij voor alle vierkanten met de oude kleur
+        for i in range(len(current_square_colors)):
+            if current_square_colors[i] == old_color:
+                canvas.itemconfig(square_widgets[i], fill=color)
+                current_square_colors[i] = color
+
+
 # Create a button
 button = tk.Button(big_frame, text="Send!", command=button_click)
 button.pack()
