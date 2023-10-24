@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import StringVar
 from tkinter import colorchooser
+from tkinter import messagebox
 import serial
 import threading
 import csv
@@ -29,14 +30,22 @@ switch_states = [0] * (grid_size)
 updateList = []
 colourList = []
 
+# Lijst om de huidige kleur van elk vierkant bij te houden
+current_square_colors = ["blue"] * grid_size
+
 def resize_canvas_to_group():
     canvas_height = square_size*(group_size/grid_columns)
     canvas.configure(scrollregion=canvas.bbox("all"), height=canvas_height)
 
 # Functie om vierkantkleuren bij te werken
 def update_square_colors():
-    for i in updateList:
-        canvas.itemconfig(i, fill=COLORS[colourList[i]])
+    for i in range(grid_size):
+        if i in updateList:
+            canvas.itemconfig(square_widgets[i], fill=COLORS[colourList[updateList.index(i)]])
+            current_square_colors[i] = COLORS[colourList[updateList.index(i)]]
+        # Voeg anders de bestaande kleur toe
+        else:
+            canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -145,20 +154,24 @@ def send_and_receive_data():
 
             for row in csv_reader:
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
-                    num1 = row[0]
-                    num2 = row[1]
-                    updateList.append(int(row[0]))
-                    colourList.append(int(row[1]))
-                    # Stuur de gecombineerde binaire gegevens naar de seriële poort
-                    ser.write(convert_data(num1, num2))
+                    num1 = int(row[0])
+                    num2 = int(row[1])
+                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):
+                        updateList.append(num1)
+                        colourList.append(num2)
+                        ser.write(convert_data(num1, num2))
+                    else:
+                        messagebox.showerror("Fout", f"Ongeldige invoer in CSV-bestand op regel {csv_reader.line_num}")
+                        ser.close()
+                        return
 
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=elapsed_time)
-            update_square_colors()
-            updateList.clear()
-            colourList.clear()
+        update_square_colors()
+        updateList.clear()  # Wis de lijst met update-vierkanten
+        colourList.clear()  # Wis de lijst met kleuren
 
     except serial.SerialException as e:
          label.config(text=f"Error {str(e)}")
@@ -168,21 +181,31 @@ def send_manual_data():
     try:
         start_time = time.time()  # Start the timer
         ser = serial.Serial(serial_port, baudrate=1843200)
-    
+
         num1 = entry_num1.get()
         num2 = entry_num2.get()
-        updateList.append(int(num1))
-        colourList.append(int(num2))
-        # Stuur de gecombineerde binaire gegevens naar de seriële poort
-        ser.write(convert_data(num1, num2))
-        
-        update_square_colors()
-        updateList.clear()
-        colourList.clear()
-        ser.close()
-        end_time = time.time()  # Stop the timer
-        elapsed_time = end_time - start_time
-        label1.config(text=elapsed_time)
+
+        if num1 and num2:
+            switch_num = int(num1)
+            signal_num = int(num2)
+
+            if 0 <= switch_num < grid_size and 0 <= signal_num < len(COLORS):
+                updateList.append(switch_num)
+                colourList.append(signal_num)
+                # Stuur de gecombineerde binaire gegevens naar de seriële poort
+                ser.write(convert_data(switch_num, signal_num))
+
+                update_square_colors()
+                updateList.clear()  # Wis de lijst met update-vierkanten
+                colourList.clear()  # Wis de lijst met kleuren
+                ser.close()
+                end_time = time.time()  # Stop the timer
+                elapsed_time = end_time - start_time
+                label1.config(text=elapsed_time)
+            else:
+                label2.config(text="Invalid input: Switch number or signal out of range")
+        else:
+            label2.config(text="Invalid input: Both fields are required")
     except serial.SerialException as e:
         label.config(text=f"Error {str(e)}")
 
@@ -268,6 +291,12 @@ def change_signal_color(signal):
         COLORS[signal] = color
         color_boxes[signal].configure(bg=color)  # Update the color of the box
 
+        # Update the color for all squares that use this signal
+        for i in range(len(colourList)):
+            if colourList[i] == signal:
+                canvas.itemconfig(updateList[i], fill=color)
+                current_square_colors[updateList[i]] = color
+                
 # Create a button
 button = tk.Button(big_frame, text="Send!", command=button_click)
 button.pack()
