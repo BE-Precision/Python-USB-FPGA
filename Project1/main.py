@@ -139,7 +139,8 @@ def convert_data(num1, num2):
     # Combineer de binaire getallen
     combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
 
-    #display_data_on_labels(num1, num2, combined_binary)
+    # Display the data on labels in a separate thread
+    threading.Thread(target=display_data_on_labels, args=(num1, num2, combined_binary)).start()
 
     myBytes = bytearray()
     
