@@ -367,20 +367,6 @@ def show_current_group():
         else:
             canvas.itemconfig(square_id, state="hidden")
 
-# Functie om naar de volgende groep te schakelen
-def next_group():
-    global current_group
-    current_group = (current_group + 1) % num_groups
-    show_current_group()
-    resize_canvas_to_group()
-
-# Functie om naar de vorige groep te schakelen
-def previous_group():
-    global current_group
-    current_group = (current_group - 1) % num_groups
-    show_current_group()
-    resize_canvas_to_group()
-
 # Voeg een functie toe om de huidige groep te wijzigen wanneer een nieuwe groep is geselecteerd in het dropdown-menu
 def on_group_selection_change(event):
     global current_group
@@ -393,10 +379,17 @@ def on_group_selection_change(event):
 group_selection = StringVar(root)
 group_selection.set(str(current_group))  # Stel de standaard selectie in op de huidige groep
 
-# Voeg een dropdown-menu toe
+# Voeg een functie toe om de waarden in de uitklapbare lijst dynamisch te genereren
+def generate_group_dropdown_values():
+    values = [str(i) for i in range(num_groups)]
+    group_selection.set(str(current_group))  # Stel de geselecteerde waarde in op de huidige groep
+    group_dropdown['values'] = values  # Update de waarden in de uitklapbare lijst
+
+# Creëer de uitklapbare lijst met module nummers
 label7 = tk.Label(big_frame, text="Module number:")
 label7.pack()
-group_dropdown = ttk.Combobox(big_frame, textvariable=group_selection, values=[str(i) for i in range(num_groups)])
+group_dropdown = ttk.Combobox(big_frame, textvariable=group_selection)
+generate_group_dropdown_values()  # Genereer de waarden voor de uitklapbare lijst
 group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
 group_dropdown.pack()
 
@@ -428,13 +421,39 @@ entry_square_size = tk.Entry(big_frame)
 entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
 entry_square_size.pack()
 
+def rearrange_squares():
+    # Herverdeel de vierkanten op het nieuwe raster
+    for i in range(grid_rows):
+        for j in range(grid_columns):
+            x0 = j * square_size
+            y0 = i * square_size
+            x1 = x0 + square_size
+            y1 = y0 + square_size
+            canvas.coords(square_widgets[i * grid_columns + j], x0, y0, x1, y1)
+
 # Voeg een functie toe om de parameters bij te werken met de ingevoerde waarden
 def update_parameters():
     global grid_columns, group_size, modules, square_size
 
+    # Haal de oude waarden op voor het geval dat validatie mislukt
+    old_grid_columns = grid_columns
+    old_group_size = group_size
+
     # Haal de ingevoerde waarden op uit de entry widgets
     grid_columns = int(entry_grid_columns.get())
     group_size = int(entry_group_size.get())
+
+    if group_size % grid_columns != 0:
+        messagebox.showerror("Ongeldige invoer", "group_size / grid_columns moet een geheel getal zijn.")
+        # Herstel de vorige waarden
+        entry_grid_columns.delete(0, END)
+        entry_group_size.delete(0, END)
+        entry_grid_columns.insert(0, old_grid_columns)
+        entry_group_size.insert(0, old_group_size)
+        grid_columns = old_grid_columns
+        group_size = old_group_size
+        return
+
     modules = int(entry_modules.get())
     square_size = int(entry_square_size.get())
 
@@ -450,6 +469,16 @@ def update_parameters():
     canvas.config(width=canvas_width, height=canvas_height)
     show_current_group()
     resize_canvas_to_group()
+    rearrange_squares()
+
+    # Controleer of de geselecteerde module groter is dan het nieuwe aantal modules
+    global current_group
+    if current_group >= modules:
+        current_group = 0  # Zet de geselecteerde module terug naar 0 als deze groter is dan het nieuwe aantal modules
+
+    # Roep de functie aan om de waarden in de uitklapbare lijst bij te werken
+    generate_group_dropdown_values()
+    on_group_selection_change("<DummyEvent>")
 
 # Voeg een updateknop toe om de parameters bij te werken
 update_button = tk.Button(big_frame, text="Update Parameters", command=update_parameters)
