@@ -48,7 +48,7 @@ def on_com_port_selection_change(event):
     global serial_port
     serial_port = port_selection.get()  # Bijwerken van de serial_port variabele
 
-grid_columns = 50
+grid_columns = 25
 group_size = 250  # Grootte van elke groep vierkantjes
 modules = 120
 grid_size = group_size*modules
@@ -266,8 +266,9 @@ def send_manual_data():
 
 # Create the main window
 root = tk.Tk()
-root.title("Python test")
+root.title("BE Precision Technlogy - Probe Card Tester")
 root.geometry("1200x800")  # Set the initial window size to 1920x1080 pixels
+root.configure(bg="white")
 
 # Create A Main frame
 main_frame = Frame(root)
@@ -288,19 +289,36 @@ my_canvas.configure(xscrollcommand=x_scrollbar.set)
 my_canvas.configure(yscrollcommand=y_scrollbar.set)
 my_canvas.bind("<Configure>", lambda e: my_canvas.config(scrollregion=my_canvas.bbox(ALL)))
 # Create Another Frame INSIDE the Canvas
-big_frame = Frame(my_canvas)
+big_frame = Frame(my_canvas, bg="white")
+
+# Voeg een zwarte balk toe aan de bovenkant van big_frame
+black_frame = tk.Frame(big_frame, bg="black")
+black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+custom_font = ("Microsoft JhengHei UI", 20, "bold")
+text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="black", font=custom_font)
+text_label.pack(side="right", padx=10)
+
+# Voeg een frame toe voor de linkerkant
+left_frame = Frame(big_frame, bg="white")
+left_frame.pack(side=LEFT, fill=BOTH, expand=1)
+
+# Voeg een frame toe voor de rechterkant
+right_frame = Frame(big_frame, bg="white")
+right_frame.pack(side=RIGHT, fill=BOTH, expand=1)
+
+
+
 # Add that New Frame a Window In The Canvas
 my_canvas.create_window((0, 0), window=big_frame, anchor="nw")
-# Create a label
-label = tk.Label(big_frame, text="FPGA TEST GUI")
-label.pack(pady=20)
 
 # Bereken de totale breedte en hoogte van het canvas
 canvas_width = grid_columns * square_size
 canvas_height = grid_rows * square_size
 
 # Create a canvas for the grid of squares
-canvas = tk.Canvas(big_frame, width=canvas_width, height=square_size*(group_size/grid_columns), bg="white")
+canvas = tk.Canvas(right_frame, width=canvas_width, height=square_size*(group_size/grid_columns), bg="white")
 canvas.pack()
 
 # Create square objects
@@ -330,8 +348,8 @@ for i in range(grid_rows):
 color_boxes = []
 colors = ["blue", "red", "green", "purple"]
 for i, color in enumerate(colors):
-    color_box = tk.Canvas(big_frame, width=30, height=30, bg=color)
-    color_box.pack(side="left")  # Use pack to place color boxes side by side
+    color_box = tk.Canvas(right_frame, width=30, height=30, bg=color)
+    color_box.pack()  # Use pack to place color boxes side by side
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
 
