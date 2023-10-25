@@ -9,11 +9,44 @@ import serial
 import threading
 import csv
 import time
+from serial.tools import list_ports
 
 # Constanten voor de kleuren
 COLORS = ["blue", "red", "green", "purple"]
 
-serial_port = 'COM15'
+# Functie om beschikbare COM-poorten op te halen
+def get_available_com_ports():
+    com_ports = [port.device for port in list_ports.comports()]
+    return com_ports
+
+# Functie om een COM-poort te selecteren
+def select_com_port():
+    com_ports = get_available_com_ports()
+    if com_ports:
+        port_selection.set(com_ports[0])  # Stel standaard de eerste beschikbare COM-poort in
+        com_port_dropdown['values'] = com_ports
+
+# Functie om de lijst met COM-poorten dynamisch bij te werken
+def update_com_ports():
+    com_ports = get_available_com_ports()
+    if com_ports:
+        current_selection = port_selection.get()
+        com_port_dropdown['values'] = com_ports
+        if current_selection in com_ports:
+            port_selection.set(current_selection)
+        elif current_selection not in com_ports:
+            # Als de huidige selectie niet langer beschikbaar is, selecteer een nieuwe COM-poort
+            port_selection.set(com_ports[0])
+    else:
+        com_port_dropdown['values'] = []  # Geen beschikbare COM-poorten
+        port_selection.set("")  # Wis de huidige selectie
+
+
+# Voeg een functie toe om de COM-poort te wijzigen wanneer een nieuwe poort is geselecteerd in het dropdown-menu
+def on_com_port_selection_change(event):
+    global serial_port
+    serial_port = port_selection.get()  # Bijwerken van de serial_port variabele
+
 grid_columns = 50
 group_size = 250  # Grootte van elke groep vierkantjes
 modules = 120
@@ -104,9 +137,16 @@ def update_square_tooltips(event):
 def button_click():
     threading.Thread(target=send_and_receive_data).start()
 
+# Voeg een functie toe om een bestand te selecteren
 def selectFile():
     global file_path
     file_path = filedialog.askopenfilename()
+    if file_path:
+        file_label.config(text=f"Geselecteerd bestand: {file_path}")
+        button.config(state=tk.NORMAL)  # Activeer de "Send" knop
+    else:
+        file_label.config(text="Geselecteerd bestand: Nog niet geselecteerd")
+        button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
 
 def convert_to_binary(number):
     # Functie om een getal naar een binaire representatie om te zetten
@@ -139,8 +179,7 @@ def convert_data(num1, num2):
     # Combineer de binaire getallen
     combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
 
-    # Display the data on labels in a separate thread
-    threading.Thread(target=display_data_on_labels, args=(num1, num2, combined_binary)).start()
+    #display_data_on_labels(num1, num2, combined_binary)
 
     myBytes = bytearray()
     
@@ -153,9 +192,11 @@ def convert_data(num1, num2):
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
+        on_com_port_selection_change("<DummyEvent>")
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
             global ser
+            global serial_port
             ser = serial.Serial(serial_port, baudrate=1843200)
             csv_reader = csv.reader(csv_file, delimiter=';')
 
@@ -180,6 +221,10 @@ def send_and_receive_data():
         updateList.clear()  # Wis de lijst met update-vierkanten
         colourList.clear()  # Wis de lijst met kleuren
 
+    except FileNotFoundError:
+        messagebox.showerror("Fout", "Het geselecteerde bestand bestaat niet.")
+    except Exception as e:
+        messagebox.showerror("Fout", f"Fout bij het verwerken van het bestand: {str(e)}")
     except serial.SerialException as e:
          label.config(text=f"Error {str(e)}")
 
@@ -310,13 +355,34 @@ def change_signal_color(signal):
                 canvas.itemconfig(square_widgets[i], fill=color)
                 current_square_colors[i] = color
 
+# Voeg een dropdown-menu toe om een COM-poort te selecteren
+label_com_port = tk.Label(big_frame, text="Select COM Port:")
+label_com_port.pack()
+port_selection = StringVar(root)
+com_port_dropdown = ttk.Combobox(big_frame, textvariable=port_selection)
+select_com_port()  # Haal beschikbare COM-poorten op en selecteer de eerste
+com_port_dropdown.bind("<<ComboboxSelected>>", on_com_port_selection_change)
+com_port_dropdown.pack()
 
-# Create a button
-button = tk.Button(big_frame, text="Send!", command=button_click)
-button.pack()
+# Functie om periodiek de COM-poorten bij te werken
+def update_com_ports_periodically():
+    update_com_ports()
+    root.after(1000, update_com_ports_periodically)  # Herhaal elke 5 seconden
+
+update_com_ports_periodically()
 
 # Create file selection button
 button = tk.Button(big_frame, text="Select File", command=selectFile)
+button.pack()
+
+# Voeg een label toe om de bestandsnaam weer te geven
+file_label = tk.Label(big_frame, text="Geselecteerd bestand: Nog niet geselecteerd")
+file_label.pack()
+
+# Create a button
+button = tk.Button(big_frame, text="Send!", command=button_click)
+if file_label.cget("text") == "Geselecteerd bestand: Nog niet geselecteerd":
+    button.config(state=tk.DISABLED)  # Deactiveer de knop
 button.pack()
 
 # Create a label
