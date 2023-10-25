@@ -10,6 +10,7 @@ import threading
 import csv
 import time
 from serial.tools import list_ports
+import os
 
 # Constanten voor de kleuren
 COLORS = ["blue", "red", "green", "purple"]
@@ -141,12 +142,14 @@ def button_click():
 def selectFile():
     global file_path
     file_path = filedialog.askopenfilename()
-    if file_path:
+    if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Geselecteerd bestand: {file_path}")
         button.config(state=tk.NORMAL)  # Activeer de "Send" knop
     else:
         file_label.config(text="Geselecteerd bestand: Nog niet geselecteerd")
         button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
+        if file_path:
+            messagebox.showerror("Fout", "Gelieve een geldig CSV-bestand te selecteren.")
 
 def convert_to_binary(number):
     # Functie om een getal naar een binaire representatie om te zetten
