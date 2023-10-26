@@ -1,11 +1,12 @@
 {
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        ".",
-        "-p",
-        "*test.py"
-    ],
-    "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "grid_columns": 25,
+    "group_size": 250,
+    "modules": 120,
+    "square_size": 15,
+    "COLORS": [
+        "#00ff80",
+        "red",
+        "green",
+        "purple"
+    ]
 }

@@ -11,9 +11,10 @@ import csv
 import time
 from serial.tools import list_ports
 import os
+import json
 
 # Constanten voor de kleuren
-COLORS = ["blue", "red", "green", "purple"]
+COLORS = []
 
 # Functie om beschikbare COM-poorten op te halen
 def get_available_com_ports():
@@ -54,6 +55,40 @@ modules = 120
 grid_size = group_size*modules
 grid_rows=int(grid_size/grid_columns)
 square_size = 15  # Grootte van elk vierkantje
+
+
+def save_parameters_to_json():
+    parameters = {
+        "grid_columns": grid_columns,
+        "group_size": group_size,
+        "modules": modules,
+        "square_size": square_size,
+        "COLORS": COLORS
+    }
+
+    try:
+        with open("Project1\.vscode\settings.json", "w") as json_file:
+            json.dump(parameters, json_file, indent=4)
+        messagebox.showinfo("Settings are saved", "Settings are saved")
+    except Exception as e:
+        messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+
+def load_parameters_from_json():
+    global grid_columns, group_size, modules, square_size, COLORS
+
+    try:
+        with open("Project1\.vscode\settings.json", "r") as json_file:
+            parameters = json.load(json_file)
+            grid_columns = parameters.get("grid_columns", grid_columns)
+            group_size = parameters.get("group_size", group_size)
+            modules = parameters.get("modules", modules)
+            square_size = parameters.get("square_size", square_size)
+            COLORS = parameters.get("COLORS", COLORS)
+    except Exception as e:
+        messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
+
+load_parameters_from_json()
+
 # Bereken het aantal groepen
 num_groups = grid_size // group_size
 
@@ -71,7 +106,7 @@ colourList = []
 updateList = []
 
 # Lijst om de huidige kleur van elk vierkant bij te houden
-current_square_colors = ["blue"] * grid_size
+current_square_colors = [COLORS[0]] * grid_size
 
 def resize_canvas_to_group():
     canvas_height = square_size*(group_size/grid_columns)
@@ -610,8 +645,13 @@ def update_parameters():
     on_group_selection_change("<DummyEvent>")
 
 # Voeg een updateknop toe om de parameters bij te werken
-update_button = tk.Button(left_frame, text="Update Parameters", command=update_parameters)
-update_button.pack(pady=(5,20))
+buttons_frame = tk.Frame(left_frame, bg="white")
+buttons_frame.pack(pady=(10,5))
+update_button = tk.Button(buttons_frame, text="Update Parameters", command=update_parameters)
+update_button.pack(side="left", padx=(0,20))
+
+save_button = tk.Button(buttons_frame, text="Opslaan", command=save_parameters_to_json)
+save_button.pack(side="left")
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
 top_right_frame2 = tk.Frame(right_frame, bg="RoyalBlue4")
