@@ -271,7 +271,7 @@ def send_manual_data():
             switch_num = int(num1)
             signal_num = int(num2)
 
-            if 0 <= switch_num < grid_size and 0 <= signal_num < len(COLORS):
+            if 0 <= switch_num < (grid_size-1) and 0 <= signal_num < len(COLORS):
                 updateList.append(switch_num)
                 colourList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
@@ -483,14 +483,14 @@ text_label.pack(side="left", padx=10, pady=5)
 # Create labels and entry fields for manual data entry
 switch_frame = tk.Frame(left_frame, bg="white")
 switch_frame.pack(pady=(10,5))
-label_num1 = tk.Label(switch_frame, text=f"Enter switch number (0-{group_size*modules-1}):", bg="white")
+label_num1 = tk.Label(switch_frame, text=f"Enter switch number (0-{group_size*modules-1}):", bg="white", width=40)
 label_num1.pack(side="left")
 entry_num1 = tk.Entry(switch_frame)
 entry_num1.pack(side="left")
 
 signal_frame = tk.Frame(left_frame, bg="white")
 signal_frame.pack(pady=5)
-label_num2 = tk.Label(signal_frame, text="Enter signal (0-3):                        ", bg="white")
+label_num2 = tk.Label(signal_frame, text="Enter signal (0-3):", bg="white", width=40)
 label_num2.pack(side="left")
 entry_num2 = tk.Entry(signal_frame)
 entry_num2.pack(side="left")
@@ -626,7 +626,9 @@ def update_parameters():
     grid_size = group_size * modules
     num_groups = grid_size // group_size
     grid_rows = grid_size // grid_columns
-
+    
+    label_num1.config(text=f"Enter switch number (0-{group_size*modules-1}):")
+    
     # Pas de grootte van het canvas aan
     canvas_width = grid_columns * square_size
     canvas_height = grid_rows * square_size
