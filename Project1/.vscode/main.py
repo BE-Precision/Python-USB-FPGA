@@ -5,6 +5,7 @@ from tkinter import ttk
 from tkinter import StringVar
 from tkinter import colorchooser
 from tkinter import messagebox
+from datetime import datetime
 import serial
 import threading
 import csv
@@ -216,6 +217,9 @@ def convert_data(num1, num2):
     combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
 
     myBytes = bytearray()
+
+    if var:
+        log_message(f"Switch: {num1}, Signal: {num2}, Binary: {combined_binary}")
     
     for i in range(0, len(combined_binary), 8):
         chunk = combined_binary[i:i + 8]
@@ -491,14 +495,14 @@ text_label.pack(side="left", padx=10, pady=5)
 # Create labels and entry fields for manual data entry
 switch_frame = tk.Frame(left_frame, bg="white")
 switch_frame.pack(pady=(10,5))
-label_num1 = tk.Label(switch_frame, text=f"Enter switch number (0-{group_size*modules-1}):", bg="white", width=40)
+label_num1 = tk.Label(switch_frame, text=f"Enter switch number (0-{group_size*modules-1}):", bg="white", width=23)
 label_num1.pack(side="left")
 entry_num1 = tk.Entry(switch_frame)
 entry_num1.pack(side="left")
 
 signal_frame = tk.Frame(left_frame, bg="white")
 signal_frame.pack(pady=5)
-label_num2 = tk.Label(signal_frame, text="Enter signal (0-3):", bg="white", width=40)
+label_num2 = tk.Label(signal_frame, text="Enter signal (0-3):                       ", bg="white")
 label_num2.pack(side="left")
 entry_num2 = tk.Entry(signal_frame)
 entry_num2.pack(side="left")
@@ -676,15 +680,20 @@ log_scrollbar = ttk.Scrollbar(right_frame, orient=VERTICAL)
 log_scrollbar.pack(side=RIGHT, fill=Y)
 
 # Maak een Text-widget voor de log en koppel deze aan de scrollbar
-log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set)
-log_text.pack(fill=BOTH, expand=True)
+log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set, height=15, width=55)
+log_text.pack(expand=True)
+
+var = tk.IntVar()
+# Maak het selectievakje en koppel het aan de variabele var
+log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
+log_data.pack(side="left", padx=20)
 
 # Verbind de scrollbar met de Text-widget
 log_scrollbar.config(command=log_text.yview)
 
 # Functie om tekst aan de log toe te voegen
 def log_message(message):
-    urrent_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Genereer een timestamp
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Genereer een timestamp
     log_text.insert(END, f"[{current_time}] {message}\n")  # Voeg timestamp toe aan het bericht
     log_text.see(END)  # Zorg ervoor dat de scrollbar automatisch naar de onderkant schuift om de nieuwste berichten te tonen
 
