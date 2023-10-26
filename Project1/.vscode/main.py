@@ -647,10 +647,10 @@ def update_parameters():
 # Voeg een updateknop toe om de parameters bij te werken
 buttons_frame = tk.Frame(left_frame, bg="white")
 buttons_frame.pack(pady=(10,5))
-update_button = tk.Button(buttons_frame, text="Update Parameters", command=update_parameters)
+update_button = tk.Button(buttons_frame, text="Update Settings", command=update_parameters)
 update_button.pack(side="left", padx=(0,20))
 
-save_button = tk.Button(buttons_frame, text="Opslaan", command=save_parameters_to_json)
+save_button = tk.Button(buttons_frame, text="Save", command=save_parameters_to_json)
 save_button.pack(side="left")
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
