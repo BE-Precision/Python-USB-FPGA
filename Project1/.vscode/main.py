@@ -143,13 +143,13 @@ def selectFile():
     global file_path
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
-        file_label.config(text=f"Geselecteerd bestand: {file_path}")
+        file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
         button.config(state=tk.NORMAL)  # Activeer de "Send" knop
     else:
-        file_label.config(text="Geselecteerd bestand: Nog niet geselecteerd")
+        file_label.config(text="Selected file: Not yet selected")
         button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
         if file_path:
-            messagebox.showerror("Fout", "Gelieve een geldig CSV-bestand te selecteren.")
+            messagebox.showerror("Error", "Select a valid CSV file")
 
 def convert_to_binary(number):
     # Functie om een getal naar een binaire representatie om te zetten
@@ -167,11 +167,6 @@ def swap_last_two_bits(binary_str):
         return binary_str[:-2] + binary_str[-1] + binary_str[-2]
     return binary_str
 
-def display_data_on_labels(switch_num, signal_num, binary_data):
-    label4.config(text=f"Switch number: {switch_num}")
-    label5.config(text=f"Signal number: {signal_num}")
-    label6.config(text=f"Binary data: {binary_data}")
-
 def convert_data(num1, num2):
     # Functie om de data achter elkaar te plakken in de juiste volgorde
 
@@ -181,8 +176,6 @@ def convert_data(num1, num2):
 
     # Combineer de binaire getallen
     combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
-
-    #display_data_on_labels(num1, num2, combined_binary)
 
     myBytes = bytearray()
     
@@ -219,7 +212,7 @@ def send_and_receive_data():
             ser.close()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
-            label1.config(text=elapsed_time)
+            label1.config(text=f"Time elapsed: {elapsed_time}")
         update_square_colors()
         updateList.clear()  # Wis de lijst met update-vierkanten
         colourList.clear()  # Wis de lijst met kleuren
@@ -228,12 +221,11 @@ def send_and_receive_data():
         messagebox.showerror("Fout", "Het geselecteerde bestand bestaat niet.")
     except Exception as e:
         messagebox.showerror("Fout", f"Fout bij het verwerken van het bestand: {str(e)}")
-    except serial.SerialException as e:
-         label.config(text=f"Error {str(e)}")
 
 # Function to send manually entered data
 def send_manual_data():
     try:
+        on_com_port_selection_change("<DummyEvent>")
         start_time = time.time()  # Start the timer
         ser = serial.Serial(serial_port, baudrate=1843200)
 
@@ -256,18 +248,19 @@ def send_manual_data():
                 ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
-                label1.config(text=elapsed_time)
+                label1.config(text=f"Time elapsed: {elapsed_time}")
             else:
-                label2.config(text="Invalid input: Switch number or signal out of range")
+                messagebox.showerror(text="Invalid input: Switch number or signal out of range")
         else:
-            label2.config(text="Invalid input: Both fields are required")
-    except serial.SerialException as e:
-        label.config(text=f"Error {str(e)}")
+            messagebox.showerror(text="Invalid input: Both fields are required")
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
 
 # Create the main window
 root = tk.Tk()
-root.title("BE Precision Technlogy - Probe Card Tester")
-root.geometry("1200x800")  # Set the initial window size to 1920x1080 pixels
+root.title("BE Precision Technology - Probe Card Tester")
+root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
+root.geometry("790x660")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
 # Create A Main frame
@@ -292,12 +285,12 @@ my_canvas.bind("<Configure>", lambda e: my_canvas.config(scrollregion=my_canvas.
 big_frame = Frame(my_canvas, bg="white")
 
 # Voeg een zwarte balk toe aan de bovenkant van big_frame
-black_frame = tk.Frame(big_frame, bg="black")
+black_frame = tk.Frame(big_frame, bg="grey20")
 black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 
 # Voeg witte tekst toe aan de zwarte balk aan de rechterkant
 custom_font = ("Microsoft JhengHei UI", 20, "bold")
-text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="black", font=custom_font)
+text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
 text_label.pack(side="right", padx=10)
 
 # Voeg een frame toe voor de linkerkant
@@ -308,7 +301,23 @@ left_frame.pack(side=LEFT, fill=BOTH, expand=1)
 right_frame = Frame(big_frame, bg="white")
 right_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
+# Voeg een blauwe balk toe aan de bovenkant van right_frame
+top_right_frame = tk.Frame(right_frame, bg="RoyalBlue4")
+top_right_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 
+# Voeg een blauwe balk toe aan de bovenkant van left_frame
+top_left_frame = tk.Frame(left_frame, bg="RoyalBlue4")
+top_left_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+custom_font = ("Microsoft JhengHei UI", 20, "bold")
+text_label = tk.Label(top_right_frame, text="Current Switch Signals", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10)
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+custom_font = ("Microsoft JhengHei UI", 20, "bold")
+text_label = tk.Label(top_left_frame, text="Send Data", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10, pady=(5,5))
 
 # Add that New Frame a Window In The Canvas
 my_canvas.create_window((0, 0), window=big_frame, anchor="nw")
@@ -317,9 +326,11 @@ my_canvas.create_window((0, 0), window=big_frame, anchor="nw")
 canvas_width = grid_columns * square_size
 canvas_height = grid_rows * square_size
 
+squares_frame = tk.Frame(right_frame, bg="white")
+squares_frame.pack()
+
 # Create a canvas for the grid of squares
-canvas = tk.Canvas(right_frame, width=canvas_width, height=square_size*(group_size/grid_columns), bg="white")
-canvas.pack()
+canvas = tk.Canvas(squares_frame, width=canvas_width, height=square_size*(group_size/grid_columns), bg="white")
 
 # Create square objects
 square_ids = []
@@ -330,7 +341,7 @@ for i in range(grid_rows):
         y0 = i * square_size
         x1 = x0 + square_size
         y1 = y0 + square_size
-        square = canvas.create_rectangle(x0, y0, x1, y1, fill="blue", state="hidden")
+        square = canvas.create_rectangle(x0, y0, x1, y1, fill=COLORS[0], state="hidden")
 
         # Voeg de widget toe aan de lijst
         square_widgets.append(square)
@@ -344,14 +355,25 @@ for i in range(grid_rows):
         canvas.tag_bind(square, "<Leave>", hide_square_tooltip)
         canvas.tag_bind(square, "<Motion>", update_square_tooltips)
 
-# Voeg gekleurde vakjes toe om de signalen weer te geven
+canvas.pack(side="left", pady=2, padx=2)
+
 color_boxes = []
-colors = ["blue", "red", "green", "purple"]
-for i, color in enumerate(colors):
-    color_box = tk.Canvas(right_frame, width=30, height=30, bg=color)
-    color_box.pack()  # Use pack to place color boxes side by side
+color_frame = tk.Frame(squares_frame, bg="white")
+color_frame.pack(side="right")
+
+color_labels = ["Signaal 1", "Signaal 2", "Signaal 3", "Signaal 4"]
+
+for i, (color, label) in enumerate(zip(COLORS, color_labels)):
+    signal_frame = tk.Frame(color_frame, bg="white")
+    signal_frame.pack(side="top")  # Plaats de frame voor elk signaal boven elkaar
+
+    color_box = tk.Canvas(signal_frame, width=30, height=30, bg=color)
+    color_box.pack(side="left")  # Plaats het kleurvak links in het frame
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
+
+    color_label = tk.Label(signal_frame, text=label, bg="white")
+    color_label.pack(side="left", padx=(0,10))  # Plaats het label links in het frame
 
 def update_all_square_colors():
     for i in range(len(square_widgets)):
@@ -366,7 +388,6 @@ def change_signal_color(signal):
     # Check if a color was selected (user didn't cancel the dialog)
     if color:
         old_color = COLORS[signal]
-        colors[signal] = color
         COLORS[signal] = color
         color_boxes[signal].configure(bg=color)  # Update the color of the box
 
@@ -377,13 +398,15 @@ def change_signal_color(signal):
                 current_square_colors[i] = color
 
 # Voeg een dropdown-menu toe om een COM-poort te selecteren
-label_com_port = tk.Label(big_frame, text="Select COM Port:")
-label_com_port.pack()
+com_frame = tk.Frame(left_frame, bg="white")
+com_frame.pack(pady=(10,0))
+label_com_port = tk.Label(com_frame, text="Select COM Port:", bg="white")
+label_com_port.pack(side="left")
 port_selection = StringVar(root)
-com_port_dropdown = ttk.Combobox(big_frame, textvariable=port_selection)
+com_port_dropdown = ttk.Combobox(com_frame, textvariable=port_selection)
 select_com_port()  # Haal beschikbare COM-poorten op en selecteer de eerste
 com_port_dropdown.bind("<<ComboboxSelected>>", on_com_port_selection_change)
-com_port_dropdown.pack()
+com_port_dropdown.pack(side="left")
 
 # Functie om periodiek de COM-poorten bij te werken
 def update_com_ports_periodically():
@@ -392,54 +415,62 @@ def update_com_ports_periodically():
 
 update_com_ports_periodically()
 
+
+file_frame = tk.Frame(left_frame, bg="white")
+file_frame.pack(pady=(10,0))
+
 # Create file selection button
-button = tk.Button(big_frame, text="Select File", command=selectFile)
-button.pack()
+button = tk.Button(file_frame, text="Select File", command=selectFile)
+button.pack(side="left", padx=(10,0))
 
 # Voeg een label toe om de bestandsnaam weer te geven
-file_label = tk.Label(big_frame, text="Geselecteerd bestand: Nog niet geselecteerd")
-file_label.pack()
+file_label = tk.Label(file_frame, text="Selected file: Not yet selected", bg="white")
+file_label.pack(side="left")
 
 # Create a button
-button = tk.Button(big_frame, text="Send!", command=button_click)
+button = tk.Button(left_frame, text="Send!", command=button_click)
 if file_label.cget("text") == "Geselecteerd bestand: Nog niet geselecteerd":
     button.config(state=tk.DISABLED)  # Deactiveer de knop
 button.pack()
 
 # Create a label
-label1 = tk.Label(big_frame, text="Time Elapsed")
+label1 = tk.Label(left_frame, text="Time elapsed: 0", bg="white")
 label1.pack(pady=20)
 
-label2 = tk.Label(big_frame, text="Serial message")
-label2.pack(pady=20)
+# Voeg een blauwe balk toe aan de bovenkant van left_frame
+top_left_frame2 = tk.Frame(left_frame, bg="RoyalBlue4")
+top_left_frame2.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(top_left_frame2, text="Manual Data", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10, pady=5)
 
 # Create labels and entry fields for manual data entry
-label_num1 = tk.Label(big_frame, text="Enter switch number (0-30000):")
-label_num1.pack()
-entry_num1 = tk.Entry(big_frame)
-entry_num1.pack()
+switch_frame = tk.Frame(left_frame, bg="white")
+switch_frame.pack(pady=(10,5))
+label_num1 = tk.Label(switch_frame, text=f"Enter switch number (0-{group_size*modules-1}):", bg="white")
+label_num1.pack(side="left")
+entry_num1 = tk.Entry(switch_frame)
+entry_num1.pack(side="left")
 
-label_num2 = tk.Label(big_frame, text="Enter signal (0-3):")
-label_num2.pack()
-entry_num2 = tk.Entry(big_frame)
-entry_num2.pack()
+signal_frame = tk.Frame(left_frame, bg="white")
+signal_frame.pack(pady=5)
+label_num2 = tk.Label(signal_frame, text="Enter signal (0-3):                        ", bg="white")
+label_num2.pack(side="left")
+entry_num2 = tk.Entry(signal_frame)
+entry_num2.pack(side="left")
 
 # Create a button to send manual data
-button_send_manual = tk.Button(big_frame, text="Send Manual Data", command=send_manual_data)
-button_send_manual.pack()
+button_send_manual = tk.Button(left_frame, text="Send Manual Data", command=send_manual_data)
+button_send_manual.pack(pady=(5,20))
 
-# Create a label
-label3 = tk.Label(big_frame, text="Last sent data")
-label3.pack()
+# Voeg een blauwe balk toe aan de bovenkant van left_frame
+top_left_frame3 = tk.Frame(left_frame, bg="RoyalBlue4")
+top_left_frame3.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 
-label4 = tk.Label(big_frame, text="Switch number: ")
-label4.pack()
-
-label5 = tk.Label(big_frame, text="Signal number: ")
-label5.pack()
-
-label6 = tk.Label(big_frame, text="Binary data: ")
-label6.pack()
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(top_left_frame3, text="Settings", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10, pady=5)
 
 # Aantal groepen en groepsgrootte
 current_group = 0
@@ -474,40 +505,50 @@ def generate_group_dropdown_values():
     group_dropdown['values'] = values  # Update de waarden in de uitklapbare lijst
 
 # Creëer de uitklapbare lijst met module nummers
-label7 = tk.Label(big_frame, text="Module number:")
-label7.pack()
-group_dropdown = ttk.Combobox(big_frame, textvariable=group_selection)
+number_frame = tk.Frame(right_frame, bg="white")
+number_frame.pack(pady=(0,20))
+label7 = tk.Label(number_frame, text="Module number:", bg="white")
+label7.pack(side="left", anchor="nw")
+group_dropdown = ttk.Combobox(number_frame, textvariable=group_selection)
 generate_group_dropdown_values()  # Genereer de waarden voor de uitklapbare lijst
 group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
-group_dropdown.pack()
+group_dropdown.pack(side="left", anchor="nw")
 
 # Standaard weergave van de huidige groep
 show_current_group()
 
 # Voeg nieuwe labels en entry widgets toe om de parameters in te stellen
-label_grid_columns = tk.Label(big_frame, text="Grid Columns:")
-label_grid_columns.pack()
-entry_grid_columns = tk.Entry(big_frame)
+columns_frame = tk.Frame(left_frame, bg="white")
+columns_frame.pack(pady=(10,5))
+label_grid_columns = tk.Label(columns_frame, text="Grid Columns:", bg="white")
+label_grid_columns.pack(side="left")
+entry_grid_columns = tk.Entry(columns_frame)
 entry_grid_columns.insert(0, grid_columns)  # Stel de standaardwaarde in
-entry_grid_columns.pack()
+entry_grid_columns.pack(side="left")
 
-label_group_size = tk.Label(big_frame, text="Group Size:")
-label_group_size.pack()
-entry_group_size = tk.Entry(big_frame)
+group_frame = tk.Frame(left_frame, bg="white")
+group_frame.pack(pady=(5))
+label_group_size = tk.Label(group_frame, text="Group Size:      ", bg="white")
+label_group_size.pack(side="left")
+entry_group_size = tk.Entry(group_frame)
 entry_group_size.insert(0, group_size)  # Stel de standaardwaarde in
-entry_group_size.pack()
+entry_group_size.pack(side="left")
 
-label_modules = tk.Label(big_frame, text="Modules:")
-label_modules.pack()
-entry_modules = tk.Entry(big_frame)
+modules_frame = tk.Frame(left_frame, bg="white")
+modules_frame.pack(pady=(5))
+label_modules = tk.Label(modules_frame, text="Modules:         ", bg="white")
+label_modules.pack(side="left")
+entry_modules = tk.Entry(modules_frame)
 entry_modules.insert(0, modules)  # Stel de standaardwaarde in
-entry_modules.pack()
+entry_modules.pack(side="left")
 
-label_square_size = tk.Label(big_frame, text="Square Size:")
-label_square_size.pack()
-entry_square_size = tk.Entry(big_frame)
+size_frame = tk.Frame(left_frame, bg="white")
+size_frame.pack(pady=(5))
+label_square_size = tk.Label(size_frame, text="Square Size:    ", bg="white")
+label_square_size.pack(side="left")
+entry_square_size = tk.Entry(size_frame)
 entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
-entry_square_size.pack()
+entry_square_size.pack(side="left")
 
 def rearrange_squares():
     # Herverdeel de vierkanten op het nieuwe raster
@@ -569,8 +610,16 @@ def update_parameters():
     on_group_selection_change("<DummyEvent>")
 
 # Voeg een updateknop toe om de parameters bij te werken
-update_button = tk.Button(big_frame, text="Update Parameters", command=update_parameters)
-update_button.pack()
+update_button = tk.Button(left_frame, text="Update Parameters", command=update_parameters)
+update_button.pack(pady=(5,20))
+
+# Voeg een blauwe balk toe aan de bovenkant van left_frame
+top_right_frame2 = tk.Frame(right_frame, bg="RoyalBlue4")
+top_right_frame2.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(top_right_frame2, text="Log", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10, pady=0)
 
 # Start the main loop
 root.mainloop()
