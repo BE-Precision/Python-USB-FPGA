@@ -72,6 +72,7 @@ def save_parameters_to_json():
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
         messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+        log_message(f"Error while saving: An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS
@@ -86,6 +87,7 @@ def load_parameters_from_json():
             COLORS = parameters.get("COLORS", COLORS)
     except Exception as e:
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
+        log_message(f"Error while loading: An error occured while loading the settings: {str(e)}")
 
 load_parameters_from_json()
 
@@ -185,6 +187,7 @@ def selectFile():
         button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
         if file_path:
             messagebox.showerror("Error", "Select a valid CSV file")
+            log_message("Error: Select a valid CSV file")
 
 def convert_to_binary(number):
     # Functie om een getal naar een binaire representatie om te zetten
@@ -253,9 +256,11 @@ def send_and_receive_data():
         colourList.clear()  # Wis de lijst met kleuren
 
     except FileNotFoundError:
-        messagebox.showerror("Fout", "Het geselecteerde bestand bestaat niet.")
+        messagebox.showerror("Error", "The selected file doesn't exist.")
+        log_message("Error: The selected file doesn't exist.")
     except Exception as e:
-        messagebox.showerror("Fout", f"Fout bij het verwerken van het bestand: {str(e)}")
+        messagebox.showerror("error", f"Error with file: {str(e)}")
+        log_message(f"Error: Error with file: {str(e)}")
 
 # Function to send manually entered data
 def send_manual_data():
@@ -286,10 +291,13 @@ def send_manual_data():
                 label1.config(text=f"Time elapsed: {elapsed_time}")
             else:
                 messagebox.showerror(text="Invalid input: Switch number or signal out of range")
+                log_message("Invalid input: Switch number or signal out of range")
         else:
             messagebox.showerror(text="Invalid input: Both fields are required")
+            log_message("Invalid input: Both fields are required")
     except Exception as e:
         messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: {str(e)}")
 
 # Create the main window
 root = tk.Tk()
@@ -662,6 +670,24 @@ top_right_frame2.pack(side="top", fill="x")  # Stel in dat het de hele breedte b
 # Voeg witte tekst toe aan de zwarte balk aan de rechterkant
 text_label = tk.Label(top_right_frame2, text="Log", fg="white", bg="RoyalBlue4", font=custom_font)
 text_label.pack(side="left", padx=10, pady=0)
+
+# Voeg een Scrollbar toe voor de Log
+log_scrollbar = ttk.Scrollbar(right_frame, orient=VERTICAL)
+log_scrollbar.pack(side=RIGHT, fill=Y)
+
+# Maak een Text-widget voor de log en koppel deze aan de scrollbar
+log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set)
+log_text.pack(fill=BOTH, expand=True)
+
+# Verbind de scrollbar met de Text-widget
+log_scrollbar.config(command=log_text.yview)
+
+# Functie om tekst aan de log toe te voegen
+def log_message(message):
+    urrent_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Genereer een timestamp
+    log_text.insert(END, f"[{current_time}] {message}\n")  # Voeg timestamp toe aan het bericht
+    log_text.see(END)  # Zorg ervoor dat de scrollbar automatisch naar de onderkant schuift om de nieuwste berichten te tonen
+
 
 # Start the main loop
 root.mainloop()
