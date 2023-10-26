@@ -56,6 +56,8 @@ modules = 120
 grid_size = group_size*modules
 grid_rows=int(grid_size/grid_columns)
 square_size = 15  # Grootte van elk vierkantje
+width = 10
+height = 10
 
 
 def save_parameters_to_json():
@@ -64,7 +66,9 @@ def save_parameters_to_json():
         "group_size": group_size,
         "modules": modules,
         "square_size": square_size,
-        "COLORS": COLORS
+        "COLORS": COLORS,
+        "width": width,
+        "height": height
     }
 
     try:
@@ -73,10 +77,9 @@ def save_parameters_to_json():
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
         messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
-        log_message(f"Error while saving: An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
-    global grid_columns, group_size, modules, square_size, COLORS
+    global grid_columns, group_size, modules, square_size, COLORS, width, height
 
     try:
         with open("Project1\.vscode\settings.json", "r") as json_file:
@@ -86,9 +89,10 @@ def load_parameters_from_json():
             modules = parameters.get("modules", modules)
             square_size = parameters.get("square_size", square_size)
             COLORS = parameters.get("COLORS", COLORS)
+            width = parameters.get("width", width)
+            height = parameters.get("height", height)
     except Exception as e:
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
-        log_message(f"Error while loading: An error occured while loading the settings: {str(e)}")
 
 load_parameters_from_json()
 
@@ -303,11 +307,21 @@ def send_manual_data():
         messagebox.showerror("Error", f"Error: {str(e)}")
         log_message(f"Error: {str(e)}")
 
+def resize_window():
+    global width
+    global height
+    # Haal de gewenste breedte en hoogte van main_frame op
+    width = big_frame.winfo_reqwidth()+20
+    height = big_frame.winfo_reqheight()+20
+    
+    # Pas de grootte van het venster aan
+    root.geometry(f"{width}x{height}")
+
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
 root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
-root.geometry("790x660")  # Set the initial window size to 1920x1080 pixels
+root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
 # Create A Main frame
@@ -657,6 +671,7 @@ def update_parameters():
     # Roep de functie aan om de waarden in de uitklapbare lijst bij te werken
     generate_group_dropdown_values()
     on_group_selection_change("<DummyEvent>")
+    resize_window()
 
 # Voeg een updateknop toe om de parameters bij te werken
 buttons_frame = tk.Frame(left_frame, bg="white")
@@ -680,8 +695,8 @@ log_scrollbar = ttk.Scrollbar(right_frame, orient=VERTICAL)
 log_scrollbar.pack(side=RIGHT, fill=Y)
 
 # Maak een Text-widget voor de log en koppel deze aan de scrollbar
-log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set, height=15, width=55)
-log_text.pack(expand=True)
+log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set, height=15)
+log_text.pack(expand=True, fill=X)
 
 var = tk.IntVar()
 # Maak het selectievakje en koppel het aan de variabele var
@@ -696,7 +711,6 @@ def log_message(message):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Genereer een timestamp
     log_text.insert(END, f"[{current_time}] {message}\n")  # Voeg timestamp toe aan het bericht
     log_text.see(END)  # Zorg ervoor dat de scrollbar automatisch naar de onderkant schuift om de nieuwste berichten te tonen
-
-
+    
 # Start the main loop
 root.mainloop()
