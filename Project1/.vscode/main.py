@@ -438,7 +438,7 @@ com_frame.pack(pady=(10,0))
 label_com_port = tk.Label(com_frame, text="Select COM Port:", bg="white")
 label_com_port.pack(side="left")
 port_selection = StringVar(root)
-com_port_dropdown = ttk.Combobox(com_frame, textvariable=port_selection)
+com_port_dropdown = ttk.Combobox(com_frame, textvariable=port_selection, state="readonly")
 select_com_port()  # Haal beschikbare COM-poorten op en selecteer de eerste
 com_port_dropdown.bind("<<ComboboxSelected>>", on_com_port_selection_change)
 com_port_dropdown.pack(side="left")
@@ -544,7 +544,7 @@ number_frame = tk.Frame(right_frame, bg="white")
 number_frame.pack(pady=(0,20))
 label7 = tk.Label(number_frame, text="Module number:", bg="white")
 label7.pack(side="left", anchor="nw")
-group_dropdown = ttk.Combobox(number_frame, textvariable=group_selection)
+group_dropdown = ttk.Combobox(number_frame, textvariable=group_selection, state="readonly")
 generate_group_dropdown_values()  # Genereer de waarden voor de uitklapbare lijst
 group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
 group_dropdown.pack(side="left", anchor="nw")
