@@ -70,7 +70,7 @@ def save_parameters_to_json():
         "width": width,
         "height": height
     }
-
+    save_button.config(state=tk.DISABLED)
     try:
         with open("Project1\.vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
@@ -663,6 +663,8 @@ def update_parameters():
     resize_canvas_to_group()
     rearrange_squares()
 
+    save_button.config(state=tk.NORMAL)
+
     # Controleer of de geselecteerde module groter is dan het nieuwe aantal modules
     global current_group
     if current_group >= modules:
@@ -679,7 +681,7 @@ buttons_frame.pack(pady=(10,5))
 update_button = tk.Button(buttons_frame, text="Update Settings", command=update_parameters)
 update_button.pack(side="left", padx=(0,20))
 
-save_button = tk.Button(buttons_frame, text="Save", command=save_parameters_to_json)
+save_button = tk.Button(buttons_frame, text="Save", command=save_parameters_to_json, state=tk.DISABLED)
 save_button.pack(side="left")
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
@@ -695,22 +697,43 @@ log_scrollbar = ttk.Scrollbar(right_frame, orient=VERTICAL)
 log_scrollbar.pack(side=RIGHT, fill=Y)
 
 # Maak een Text-widget voor de log en koppel deze aan de scrollbar
-log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set, height=15)
-log_text.pack(expand=True, fill=X)
-
-var = tk.IntVar()
-# Maak het selectievakje en koppel het aan de variabele var
-log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
-log_data.pack(side="left", padx=20)
-
-# Verbind de scrollbar met de Text-widget
-log_scrollbar.config(command=log_text.yview)
+log_text = tk.Text(right_frame, wrap=WORD, yscrollcommand=log_scrollbar.set, height=15, bg="lavender")
+log_text.pack(expand=True, fill=X, padx=20)
 
 # Functie om tekst aan de log toe te voegen
 def log_message(message):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Genereer een timestamp
     log_text.insert(END, f"[{current_time}] {message}\n")  # Voeg timestamp toe aan het bericht
     log_text.see(END)  # Zorg ervoor dat de scrollbar automatisch naar de onderkant schuift om de nieuwste berichten te tonen
+
+# Functie om de log op te slaan
+def save_log():
+    # Vraag de gebruiker om een bestandslocatie te selecteren en een bestandsnaam in te voeren
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+
+    if file_path:
+        # Schrijf de log naar het geselecteerde bestand
+        with open(file_path, 'w') as file:
+            file.write(log_text.get("1.0", "end"))
+
+# Functie om de log te resetten
+def reset_log():
+    log_text.delete("1.0", "end")
+
+var = tk.IntVar()
+# Maak het selectievakje en koppel het aan de variabele var
+log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
+log_data.pack(side="left", padx=20)
+
+save_log_button = tk.Button(right_frame, text="Save Log", command=save_log)
+save_log_button.pack(side="left")
+
+# Knop om de log te resetten
+reset_button = tk.Button(right_frame, text="Reset Log", command=reset_log)
+reset_button.pack(side="left", padx=20)
+
+# Verbind de scrollbar met de Text-widget
+log_scrollbar.config(command=log_text.yview)
     
 # Start the main loop
 root.mainloop()
