@@ -222,7 +222,7 @@ def convert_data(num1, num2):
 
     myBytes = bytearray()
 
-    if var:
+    if var.get()==1:
         log_message(f"Switch: {num1}, Signal: {num2}, Binary: {combined_binary}")
     
     for i in range(0, len(combined_binary), 8):
@@ -521,9 +521,30 @@ label_num2.pack(side="left")
 entry_num2 = tk.Entry(signal_frame)
 entry_num2.pack(side="left")
 
+def reset_all():
+    try:
+        on_com_port_selection_change("<DummyEvent>")
+        ser = serial.Serial(serial_port, baudrate=1843200)
+        ser.write(convert_data(32767, 3))
+
+        # Werk de kleur van de vierkanten bij voor alle vierkanten met de oude kleur
+        for i in range(len(current_square_colors)):
+            canvas.itemconfig(square_widgets[i], fill=COLORS[0])
+            current_square_colors[i] = COLORS[0]
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: {str(e)}")
+
+button_frame = tk.Frame(left_frame, bg="white")
+button_frame.pack(pady=(5,20))
+
 # Create a button to send manual data
-button_send_manual = tk.Button(left_frame, text="Send Manual Data", command=send_manual_data)
-button_send_manual.pack(pady=(5,20))
+button_send_manual = tk.Button(button_frame, text="Send Manual Data", command=send_manual_data)
+button_send_manual.pack(side="left")
+
+# Create a button to send manual data
+reset_all_button = tk.Button(button_frame, text="Reset All", command=reset_all)
+reset_all_button.pack(side="left", padx=20)
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
 top_left_frame3 = tk.Frame(left_frame, bg="RoyalBlue4")
@@ -624,7 +645,7 @@ def rearrange_squares():
 # Voeg een functie toe om de parameters bij te werken met de ingevoerde waarden
 def update_parameters():
     global grid_columns, group_size, modules, square_size
-
+    
     # Haal de oude waarden op voor het geval dat validatie mislukt
     old_grid_columns = grid_columns
     old_group_size = group_size
@@ -720,7 +741,7 @@ def save_log():
 def reset_log():
     log_text.delete("1.0", "end")
 
-var = tk.IntVar()
+var = tk.IntVar(value=0)
 # Maak het selectievakje en koppel het aan de variabele var
 log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
 log_data.pack(side="left", padx=20)
