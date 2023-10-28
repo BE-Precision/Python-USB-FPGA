@@ -32,23 +32,37 @@ def select_com_port():
 # Functie om de lijst met COM-poorten dynamisch bij te werken
 def update_com_ports():
     com_ports = get_available_com_ports()
+    
     if com_ports:
+        # Ophalen van de huidige selectie
         current_selection = port_selection.get()
-        com_port_dropdown['values'] = com_ports
-        if current_selection in com_ports:
-            port_selection.set(current_selection)
-        elif current_selection not in com_ports:
-            # Als de huidige selectie niet langer beschikbaar is, selecteer een nieuwe COM-poort
-            port_selection.set(com_ports[0])
+        
+        # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
+        if current_selection not in com_ports:
+            current_selection = com_ports[0] if com_ports else ""
+        
+        # Bijwerken van de dropdown-menu's
+        for com_port_dropdown in dropdown_menus:
+            com_port_dropdown['values'] = com_ports
+            com_port_dropdown.set(current_selection)  # Stel de huidige selectie opnieuw in
+        
+        # Huidige selectie instellen
+        port_selection.set(current_selection)
     else:
-        com_port_dropdown['values'] = []  # Geen beschikbare COM-poorten
+        # Geen beschikbare COM-poorten
+        for com_port_dropdown in dropdown_menus:
+            com_port_dropdown['values'] = []
+            com_port_dropdown.set("")  # Wis de huidige selectie
+
         port_selection.set("")  # Wis de huidige selectie
 
 
-# Voeg een functie toe om de COM-poort te wijzigen wanneer een nieuwe poort is geselecteerd in het dropdown-menu
-def on_com_port_selection_change(event):
-    global serial_port
-    serial_port = port_selection.get()  # Bijwerken van de serial_port variabele
+# Functie om de COM-poort van een module op te halen
+def get_com_port_for_module(module_number):
+    # Haal de index op van de module in de module_frames-lijst
+    index = module_number % len(module_frames)
+    com_port_dropdown = module_frames[index][1]
+    return com_port_dropdown.get()
 
 grid_columns = 25
 group_size = 250  # Grootte van elke groep vierkantjes
@@ -333,6 +347,8 @@ root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
+port_selection = StringVar(root)
+
 # Create A Main frame
 main_frame = Frame(root)
 main_frame.pack(fill=BOTH, expand=1)
@@ -473,24 +489,10 @@ def change_signal_color(signal):
                 canvas.itemconfig(square_widgets[i], fill=color)
                 current_square_colors[i] = color
 
-# Voeg een dropdown-menu toe om een COM-poort te selecteren
-com_frame = tk.Frame(left_frame, bg="white")
-com_frame.pack(pady=(10,0))
-label_com_port = tk.Label(com_frame, text="Select COM Port:", bg="white")
-label_com_port.pack(side="left")
-port_selection = StringVar(root)
-com_port_dropdown = ttk.Combobox(com_frame, textvariable=port_selection, state="readonly")
-select_com_port()  # Haal beschikbare COM-poorten op en selecteer de eerste
-com_port_dropdown.bind("<<ComboboxSelected>>", on_com_port_selection_change)
-com_port_dropdown.pack(side="left")
-
 # Functie om periodiek de COM-poorten bij te werken
 def update_com_ports_periodically():
     update_com_ports()
     root.after(1000, update_com_ports_periodically)  # Herhaal elke 5 seconden
-
-update_com_ports_periodically()
-
 
 file_frame = tk.Frame(left_frame, bg="white")
 file_frame.pack(pady=(10,0))
@@ -806,8 +808,27 @@ button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg=
 button1.pack(side="left")
 button2.pack(side="left")
 
-label2 = tk.Label(big_frame2, text="Dit is scherm 2", font=("Helvetica", 16))
-label2.pack(pady=20)
+# Maak een frame voor de module dropdowns
+modules_frame = tk.Frame(big_frame2)
+modules_frame.pack()
+
+# Voeg labels en dropdown-menu's toe voor modules
+
+module_frames = []
+dropdown_menus = []
+
+for i in range(20):
+    for j in range(6):
+        frame_com = tk.Frame(modules_frame)
+        frame_com.grid(row=i, column=j, padx=5, pady=5)  # Gebruik .grid om frames in het raster te plaatsen
+        label_module = tk.Label(frame_com, text=f"Module {i*6 + j}")  # Berekent de juiste module-index
+        label_module.pack(side="left")
+        com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
+        com_port_dropdown.pack(side="left")
+        module_frames.append((label_module, com_port_dropdown))
+        dropdown_menus.append(com_port_dropdown)
+
+update_com_ports_periodically()
 
 # Start the main loop
 root.mainloop()
