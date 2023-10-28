@@ -317,6 +317,15 @@ def resize_window():
     # Pas de grootte van het venster aan
     root.geometry(f"{width}x{height}")
 
+def switch_to_screen1():
+    screen2.pack_forget()
+    main_frame.pack()
+    big_frame.pack()
+
+def switch_to_screen2():
+    main_frame.pack_forget()
+    screen2.pack(side="left", anchor="nw", fill=BOTH, expand=1)
+
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
@@ -344,6 +353,7 @@ my_canvas.configure(yscrollcommand=y_scrollbar.set)
 my_canvas.bind("<Configure>", lambda e: my_canvas.config(scrollregion=my_canvas.bbox(ALL)))
 # Create Another Frame INSIDE the Canvas
 big_frame = Frame(my_canvas, bg="white")
+big_frame.grid()
 
 # Voeg een zwarte balk toe aan de bovenkant van big_frame
 black_frame = tk.Frame(big_frame, bg="grey20")
@@ -351,8 +361,13 @@ black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaa
 
 # Voeg witte tekst toe aan de zwarte balk aan de rechterkant
 custom_font = ("Microsoft JhengHei UI", 20, "bold")
+custom_font2 = ("Microsoft JhengHei UI", 15, "bold")
 text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
 text_label.pack(side="right", padx=10)
+button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button1.pack(side="left")
+button2.pack(side="left")
 
 # Voeg een frame toe voor de linkerkant
 left_frame = Frame(big_frame, bg="white")
@@ -755,6 +770,44 @@ reset_button.pack(side="left", padx=20)
 
 # Verbind de scrollbar met de Text-widget
 log_scrollbar.config(command=log_text.yview)
-    
+
+# Maak scherm 2
+screen2 = tk.Frame(root)
+screen2.grid_remove()
+
+# Create Frame for X Scrollbar
+sec2 = Frame(screen2)
+sec2.pack(fill=X, side=BOTTOM)
+# Create A Canvas
+my_canvas2 = Canvas(screen2)
+my_canvas2.pack(side=LEFT, fill=BOTH, expand=1)
+# Add A Scrollbars to Canvas
+x_scrollbar2 = ttk.Scrollbar(sec2, orient=HORIZONTAL, command=my_canvas2.xview)
+x_scrollbar2.pack(side=BOTTOM, fill=X)
+y_scrollbar2 = ttk.Scrollbar(screen2, orient=VERTICAL, command=my_canvas2.yview)
+y_scrollbar2.pack(side=RIGHT, fill=Y)
+# Configure the canvas
+my_canvas2.configure(xscrollcommand=x_scrollbar.set)
+my_canvas2.configure(yscrollcommand=y_scrollbar.set)
+my_canvas2.bind("<Configure>", lambda e: my_canvas2.config(scrollregion=my_canvas2.bbox(ALL)))
+# Create Another Frame INSIDE the Canvas
+big_frame2 = Frame(my_canvas2, bg="white")
+big_frame2.grid()
+
+# Voeg een zwarte balk toe aan de bovenkant van big_frame
+black_frame = tk.Frame(big_frame2, bg="grey20")
+black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
+text_label.pack(side="right", padx=10)
+button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button1.pack(side="left")
+button2.pack(side="left")
+
+label2 = tk.Label(big_frame2, text="Dit is scherm 2", font=("Helvetica", 16))
+label2.pack(pady=20)
+
 # Start the main loop
 root.mainloop()
