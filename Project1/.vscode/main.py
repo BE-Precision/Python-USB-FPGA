@@ -64,10 +64,8 @@ def get_com_port_for_module(module_number):
     com_port_dropdown = module_frames[index][1]
     return com_port_dropdown.get()
 
-previous_com_port = -1
-def open_serial_port_for_switch(switch_number):
-    global previous_com_port
-    
+def open_serial_port_for_switch(switch_number): 
+    global group_size   
     # Bepaal bij welke module de schakelaar hoort
     module_number = switch_number // group_size
 
@@ -75,14 +73,8 @@ def open_serial_port_for_switch(switch_number):
     com_port = get_com_port_for_module(module_number)
 
     if com_port:
-        if com_port != previous_com_port:
-            # De COM-poort is nog niet geopend, dus open deze
-            try:
-                seri = serial.Serial(com_port, baudrate=1843200)
-                previous_com_port = com_port
-            except Exception as e:
-                messagebox.showerror("Error", f"Error while opening com port {com_port}: {str(e)}")
-                log_message(f"Error while opening com port {com_port}: {str(e)}")
+        # De COM-poort is nog niet geopend, dus open deze
+        seri = serial.Serial(com_port, baudrate=1843200)
     return seri
 
 grid_columns = 25
@@ -250,7 +242,7 @@ def convert_data(num1, num2):
     # Functie om de data achter elkaar te plakken in de juiste volgorde
 
     # Zet de getallen om naar binaire representaties
-    binary_num1 = convert_to_binary(num1)
+    binary_num1 = convert_to_binary(num1%group_size)
     binary_num2 = convert_to_binary2(num2)
 
     # Combineer de binaire getallen
@@ -266,11 +258,12 @@ def convert_data(num1, num2):
         myBytes.append(int(chunk, 2))
     
     return myBytes
-
+previous_module = -1
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
-    try:
-        on_com_port_selection_change("<DummyEvent>")
+    #try:
+        global previous_module
+        global group_size
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
             global ser
@@ -281,7 +274,12 @@ def send_and_receive_data():
                     num1 = int(row[0])
                     num2 = int(row[1])
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):
-                        ser = open_serial_port_for_switch(num1)
+                        module_number = num1 // group_size
+                        if module_number != previous_module:
+                            if previous_module != -1:
+                                ser.close()
+                            ser = open_serial_port_for_switch(num1)
+                            previous_module = module_number
                         updateList.append(num1)
                         colourList.append(num2)
                         ser.write(convert_data(num1, num2))
@@ -300,18 +298,17 @@ def send_and_receive_data():
         updateList.clear()  # Wis de lijst met update-vierkanten
         colourList.clear()  # Wis de lijst met kleuren
 
-    except FileNotFoundError:
-        messagebox.showerror("Error", "The selected file doesn't exist.")
-        log_message("Error: The selected file doesn't exist.")
-    except Exception as e:
-        messagebox.showerror("error", f"Error with file: {str(e)}")
-        log_message(f"Error: Error with file: {str(e)}")
+    #except FileNotFoundError:
+        #messagebox.showerror("Error", "The selected file doesn't exist.")
+        #log_message("Error: The selected file doesn't exist.")
+    #except Exception as e:
+        #messagebox.showerror("Error", f"Error: {str(e)}")
+        #log_message(f"Error: Error: {str(e)}")
 
 # Function to send manually entered data
 def send_manual_data():
     try:
         global ser
-        on_com_port_selection_change("<DummyEvent>")
         start_time = time.time()  # Start the timer
 
         num1 = entry_num1.get()
@@ -321,7 +318,7 @@ def send_manual_data():
             switch_num = int(num1)
             signal_num = int(num2)
 
-            if 0 <= switch_num < (grid_size-1) and 0 <= signal_num < len(COLORS):
+            if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
                 ser = open_serial_port_for_switch(switch_num)
                 updateList.append(switch_num)
                 colourList.append(signal_num)
@@ -337,10 +334,10 @@ def send_manual_data():
                 label1.config(text=f"Time elapsed: {elapsed_time}")
                 log_message(f"Time elapsed: {elapsed_time}")
             else:
-                messagebox.showerror(text="Invalid input: Switch number or signal out of range")
+                messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
         else:
-            messagebox.showerror(text="Invalid input: Both fields are required")
+            messagebox.showerror("Error", "Invalid input: Both fields are required")
             log_message("Invalid input: Both fields are required")
     except Exception as e:
         messagebox.showerror("Error", f"Error: {str(e)}")
@@ -565,7 +562,6 @@ entry_num2.pack(side="left")
 
 def reset_all():
     try:
-        on_com_port_selection_change("<DummyEvent>")
         ser = serial.Serial(serial_port, baudrate=1843200)
         ser.write(convert_data(32767, 3))
 
