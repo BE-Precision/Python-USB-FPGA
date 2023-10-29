@@ -64,6 +64,27 @@ def get_com_port_for_module(module_number):
     com_port_dropdown = module_frames[index][1]
     return com_port_dropdown.get()
 
+previous_com_port = -1
+def open_serial_port_for_switch(switch_number):
+    global previous_com_port
+    
+    # Bepaal bij welke module de schakelaar hoort
+    module_number = switch_number // group_size
+
+    # Haal de COM-poort op voor de module
+    com_port = get_com_port_for_module(module_number)
+
+    if com_port:
+        if com_port != previous_com_port:
+            # De COM-poort is nog niet geopend, dus open deze
+            try:
+                seri = serial.Serial(com_port, baudrate=1843200)
+                previous_com_port = com_port
+            except Exception as e:
+                messagebox.showerror("Error", f"Error while opening com port {com_port}: {str(e)}")
+                log_message(f"Error while opening com port {com_port}: {str(e)}")
+    return seri
+
 grid_columns = 25
 group_size = 250  # Grootte van elke groep vierkantjes
 modules = 120
@@ -91,6 +112,7 @@ def save_parameters_to_json():
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
         messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+        log_message(f"An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height
@@ -252,8 +274,6 @@ def send_and_receive_data():
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
             global ser
-            global serial_port
-            ser = serial.Serial(serial_port, baudrate=1843200)
             csv_reader = csv.reader(csv_file, delimiter=';')
 
             for row in csv_reader:
@@ -261,11 +281,13 @@ def send_and_receive_data():
                     num1 = int(row[0])
                     num2 = int(row[1])
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):
+                        ser = open_serial_port_for_switch(num1)
                         updateList.append(num1)
                         colourList.append(num2)
                         ser.write(convert_data(num1, num2))
                     else:
-                        messagebox.showerror("Fout", f"Ongeldige invoer in CSV-bestand op regel {csv_reader.line_num}")
+                        messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
+                        log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
                         ser.close()
                         return
 
@@ -273,6 +295,7 @@ def send_and_receive_data():
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=f"Time elapsed: {elapsed_time}")
+            log_message(f"Time elapsed: {elapsed_time}")
         update_square_colors()
         updateList.clear()  # Wis de lijst met update-vierkanten
         colourList.clear()  # Wis de lijst met kleuren
@@ -287,9 +310,9 @@ def send_and_receive_data():
 # Function to send manually entered data
 def send_manual_data():
     try:
+        global ser
         on_com_port_selection_change("<DummyEvent>")
         start_time = time.time()  # Start the timer
-        ser = serial.Serial(serial_port, baudrate=1843200)
 
         num1 = entry_num1.get()
         num2 = entry_num2.get()
@@ -299,6 +322,7 @@ def send_manual_data():
             signal_num = int(num2)
 
             if 0 <= switch_num < (grid_size-1) and 0 <= signal_num < len(COLORS):
+                ser = open_serial_port_for_switch(switch_num)
                 updateList.append(switch_num)
                 colourList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
@@ -311,6 +335,7 @@ def send_manual_data():
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
+                log_message(f"Time elapsed: {elapsed_time}")
             else:
                 messagebox.showerror(text="Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
