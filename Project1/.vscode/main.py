@@ -34,20 +34,18 @@ def update_com_ports():
     com_ports = get_available_com_ports()
     
     if com_ports:
-        # Ophalen van de huidige selectie
-        current_selection = port_selection.get()
-        
-        # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
-        if current_selection not in com_ports:
-            current_selection = com_ports[0] if com_ports else ""
-        
-        # Bijwerken van de dropdown-menu's
         for com_port_dropdown in dropdown_menus:
+            # Ophalen van de huidige selectie voor elk dropdown-menu
+            current_selection = com_port_dropdown.get()
+            
+            # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
+            if current_selection not in com_ports:
+                current_selection = com_ports[0] if com_ports else ""
+            
+            # Bijwerken van de dropdown-menu met de juiste waarden
             com_port_dropdown['values'] = com_ports
             com_port_dropdown.set(current_selection)  # Stel de huidige selectie opnieuw in
         
-        # Huidige selectie instellen
-        port_selection.set(current_selection)
     else:
         # Geen beschikbare COM-poorten
         for com_port_dropdown in dropdown_menus:
