@@ -14,6 +14,8 @@ from serial.tools import list_ports
 import os
 import json
 
+
+
 # Constanten voor de kleuren
 COLORS = []
 
@@ -125,6 +127,9 @@ def load_parameters_from_json():
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
 
 load_parameters_from_json()
+
+ser = [] * group_size
+open_ports = []
 
 # Bereken het aantal groepen
 num_groups = grid_size // group_size
@@ -261,22 +266,23 @@ def convert_data(num1, num2):
     
     return myBytes
 
+
 # Functie om alle seriële poorten te openen
 def open_all_serial_ports():
     global ser_ports, num_groups
     ser_ports = [None] * num_groups  # Maak een lijst met None waarden voor alle modules
     for module_number in range(num_groups):
-        com_port = get_com_port_for_module(module_number)
-        if com_port:
-            ser_ports[module_number] = open_serial_port_for_switch(module_number)
+        if not open_ports.__contains__(get_com_port_for_module(module_number)):
+            open_ports.append(get_com_port_for_module(module_number))
+            ser.append(serial.Serial(get_com_port_for_module(module_number), 138400))
 
 # Functie om alle seriële poorten te sluiten
 def close_all_serial_ports():
     global ser_ports, num_groups
-    for module_number in range(num_groups):
-        if ser_ports[module_number] is not None:
-            ser_ports[module_number].close()
-            ser_ports[module_number] = None
+    for i, item in enumerate(open_ports):
+        ser[i].close()
+    open_ports.clear()
+    ser.clear()
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
@@ -293,10 +299,11 @@ def send_and_receive_data():
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
                     num1 = int(row[0])
                     num2 = int(row[1])
+                    moduleNumber = int(num1/group_size)
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
                         updateList.append(num1)
                         colourList.append(num2)
-                        ser_ports[num1].write(convert_data(num1, num2))
+                        ser[moduleNumber].write(convert_data(num1, num2))
                     else:
                         messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
                         log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
@@ -321,7 +328,7 @@ def send_and_receive_data():
 # Function to send manually entered data
 def send_manual_data():
     try:
-        global ser
+        #global ser
         start_time = time.time()  # Start the timer
 
         num1 = entry_num1.get()
@@ -332,16 +339,16 @@ def send_manual_data():
             signal_num = int(num2)
 
             if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
-                ser = open_serial_port_for_switch(switch_num)
+                #ser = open_serial_port_for_switch(switch_num)
                 updateList.append(switch_num)
                 colourList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
-                ser.write(convert_data(switch_num, signal_num))
+                #ser.write(convert_data(switch_num, signal_num))
 
                 update_square_colors()
                 updateList.clear()  # Wis de lijst met update-vierkanten
                 colourList.clear()  # Wis de lijst met kleuren
-                ser.close()
+                #ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
@@ -575,8 +582,8 @@ entry_num2.pack(side="left")
 
 def reset_all():
     try:
-        ser = serial.Serial(serial_port, baudrate=1843200)
-        ser.write(convert_data(32767, 3))
+     #   ser = serial.Serial(serial_port, baudrate=1843200)
+      #  ser.write(convert_data(32767, 3))
 
         # Werk de kleur van de vierkanten bij voor alle vierkanten met de oude kleur
         for i in range(len(current_square_colors)):
