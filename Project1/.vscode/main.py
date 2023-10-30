@@ -62,8 +62,10 @@ def get_com_port_for_module(module_number):
     com_port_dropdown = module_frames[index][1]
     return com_port_dropdown.get()
 
-def open_serial_port_for_switch(switch_number): 
-    global group_size   
+opened_serial_ports = [None] * 256  # Maak een lijst met 256 lege waarden om COM-poorten bij te houden
+
+def open_serial_port_for_switch(switch_number):
+    global group_size
     # Bepaal bij welke module de schakelaar hoort
     module_number = switch_number // group_size
 
@@ -71,9 +73,11 @@ def open_serial_port_for_switch(switch_number):
     com_port = get_com_port_for_module(module_number)
 
     if com_port:
-        # De COM-poort is nog niet geopend, dus open deze
-        seri = serial.Serial(com_port, baudrate=1843200)
-    return seri
+        # Als de COM-poort nog niet is geopend, open deze
+        if not opened_serial_ports[switch_number].isOpen():
+            opened_serial_ports[switch_number] = serial.Serial(com_port, baudrate=1843200)
+
+    return opened_serial_ports[switch_number]
 
 grid_columns = 25
 group_size = 250  # Grootte van elke groep vierkantjes
@@ -256,38 +260,49 @@ def convert_data(num1, num2):
         myBytes.append(int(chunk, 2))
     
     return myBytes
-previous_module = -1
+
+# Functie om alle seriële poorten te openen
+def open_all_serial_ports():
+    global ser_ports, num_groups
+    ser_ports = [None] * num_groups  # Maak een lijst met None waarden voor alle modules
+    for module_number in range(num_groups):
+        com_port = get_com_port_for_module(module_number)
+        if com_port:
+            ser_ports[module_number] = open_serial_port_for_switch(module_number)
+
+# Functie om alle seriële poorten te sluiten
+def close_all_serial_ports():
+    global ser_ports, num_groups
+    for module_number in range(num_groups):
+        if ser_ports[module_number] is not None:
+            ser_ports[module_number].close()
+            ser_ports[module_number] = None
+
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
-    #try:
+    try:
         global previous_module
         global group_size
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
-            global ser
+            global ser_ports
+            open_all_serial_ports()
             csv_reader = csv.reader(csv_file, delimiter=';')
 
             for row in csv_reader:
                 if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
                     num1 = int(row[0])
                     num2 = int(row[1])
-                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):
-                        module_number = num1 // group_size
-                        if module_number != previous_module:
-                            if previous_module != -1:
-                                ser.close()
-                            ser = open_serial_port_for_switch(num1)
-                            previous_module = module_number
+                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
                         updateList.append(num1)
                         colourList.append(num2)
-                        ser.write(convert_data(num1, num2))
+                        ser_ports[num1].write(convert_data(num1, num2))
                     else:
                         messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
                         log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
-                        ser.close()
+                        close_all_serial_ports()
                         return
-
-            ser.close()
+            close_all_serial_ports()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=f"Time elapsed: {elapsed_time}")
@@ -296,12 +311,12 @@ def send_and_receive_data():
         updateList.clear()  # Wis de lijst met update-vierkanten
         colourList.clear()  # Wis de lijst met kleuren
 
-    #except FileNotFoundError:
-        #messagebox.showerror("Error", "The selected file doesn't exist.")
-        #log_message("Error: The selected file doesn't exist.")
-    #except Exception as e:
-        #messagebox.showerror("Error", f"Error: {str(e)}")
-        #log_message(f"Error: Error: {str(e)}")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "The selected file doesn't exist.")
+        log_message("Error: The selected file doesn't exist.")
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: Error: {str(e)}")
 
 # Function to send manually entered data
 def send_manual_data():
