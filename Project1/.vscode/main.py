@@ -14,7 +14,8 @@ from serial.tools import list_ports
 import os
 import json
 
-
+global loaded
+loaded = 0
 
 # Constanten voor de kleuren
 COLORS = []
@@ -33,6 +34,7 @@ def select_com_port():
 
 # Functie om de lijst met COM-poorten dynamisch bij te werken
 def update_com_ports():
+    global loaded
     com_ports = get_available_com_ports()
     
     if com_ports:
@@ -42,6 +44,9 @@ def update_com_ports():
             
             # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
             if current_selection not in com_ports:
+                if loaded:
+                    messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected.")
+                    log_message(f"Caution! COM port {current_selection} could not be loaded, might be disconnected.")
                 current_selection = com_ports[0] if com_ports else ""
             
             # Bijwerken van de dropdown-menu met de juiste waarden
@@ -76,7 +81,7 @@ def open_serial_port_for_switch(switch_number):
 
     if com_port:
         # Als de COM-poort nog niet is geopend, open deze
-        if not opened_serial_ports[switch_number].isOpen():
+        if com_port not in opened_serial_ports:
             opened_serial_ports[switch_number] = serial.Serial(com_port, baudrate=1843200)
 
     return opened_serial_ports[switch_number]
@@ -141,8 +146,8 @@ switch_states = [0] * (grid_size)
 # Standaardkleur voor elk vierkant
 default_color = 0  # Je kunt dit aanpassen aan je voorkeur
 
-# Initialiseer de colourList met standaardkleuren voor alle vierkanten
-colourList = []
+# Initialiseer de colorList met standaardkleuren voor alle vierkanten
+colorList = []
 
 # Lijst om bij te houden welke squares moeten worden geüpdatet en hun kleur
 updateList = []
@@ -158,8 +163,8 @@ def resize_canvas_to_group():
 def update_square_colors():
     for i in range(grid_size):
         if i in updateList:
-            canvas.itemconfig(square_widgets[i], fill=COLORS[colourList[updateList.index(i)]])
-            current_square_colors[i] = COLORS[colourList[updateList.index(i)]]
+            canvas.itemconfig(square_widgets[i], fill=COLORS[colorList[updateList.index(i)]])
+            current_square_colors[i] = COLORS[colorList[updateList.index(i)]]
         # Voeg anders de bestaande kleur toe
         else:
             canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
@@ -302,7 +307,7 @@ def send_and_receive_data():
                     moduleNumber = int(num1/group_size)
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
                         updateList.append(num1)
-                        colourList.append(num2)
+                        colorList.append(num2)
                         ser[moduleNumber].write(convert_data(num1, num2))
                     else:
                         messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
@@ -341,16 +346,16 @@ def send_manual_data():
             signal_num = int(num2)
 
             if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
-                #ser = open_serial_port_for_switch(switch_num)
+                ser = open_serial_port_for_switch(switch_num)
                 updateList.append(switch_num)
-                colourList.append(signal_num)
+                colorList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
-                #ser.write(convert_data(switch_num, signal_num))
+                ser.write(convert_data(switch_num, signal_num))
 
                 update_square_colors()
                 updateList.clear()  # Wis de lijst met update-vierkanten
-                colourList.clear()  # Wis de lijst met kleuren
-                #ser.close()
+                colorList.clear()  # Wis de lijst met kleuren
+                ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
@@ -514,7 +519,7 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
 def update_all_square_colors():
     for i in range(len(square_widgets)):
         square_id = square_widgets[i]
-        canvas.itemconfig(square_id, fill=COLORS[colourList[i]])
+        canvas.itemconfig(square_id, fill=COLORS[colorList[i]])
 
 # Functie om de kleur van een signaal te wijzigen
 def change_signal_color(signal):
@@ -584,9 +589,10 @@ entry_num2.pack(side="left")
 
 def reset_all():
     try:
-     #   ser = serial.Serial(serial_port, baudrate=1843200)
-      #  ser.write(convert_data(32767, 3))
-
+        open_all_serial_ports()
+        for serialconnection in ser:
+            serialconnection.write(11111111111111111)#TO DO: UITVOGELEN HOE DEZE SHIT OOK ALWEER WERKT
+        close_all_serial_ports()
         # Werk de kleur van de vierkanten bij voor alle vierkanten met de oude kleur
         for i in range(len(current_square_colors)):
             canvas.itemconfig(square_widgets[i], fill=COLORS[0])
@@ -870,6 +876,49 @@ for i in range(20):
         com_port_dropdown.pack(side="left")
         module_frames.append((label_module, com_port_dropdown))
         dropdown_menus.append(com_port_dropdown)
+
+def saveComToJSON():
+    comPortsFromDropdown = []
+    comPortsFromDropdown.clear()
+    for i in range(120):
+        comPortsFromDropdown.append(get_com_port_for_module(i))
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
+    try:
+        with open(file_path, "w") as json_file:
+            json.dump(comPortsFromDropdown, json_file)
+        messagebox.showinfo("Settings are saved", "Settings are saved")
+    except Exception as e:
+        messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+        log_message(f"An error occured when saving: {str(e)}")
+    return 0
+
+def loadComFromJSON():
+    global loaded
+    loaded =0
+    file_path=filedialog.askopenfilename()
+    comList = []
+    try:
+        with open(file_path, "r") as json_file:
+            comList.clear()
+            comList = json.load(json_file)
+        messagebox.showinfo("Settings are loaded", "Settings are loaded")
+    except Exception as e:
+        loaded = 0
+        messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
+        log_message(f"An error occured when loading: {str(e)}")
+
+    i = 0
+    for com_port_dropdown in dropdown_menus:
+        com_port_dropdown.set(comList[i])
+        i = i+1
+    loaded = 1
+    update_com_ports()
+SaveComToJsonBtn = tk.Button(big_frame2, text="Save to JSON", command=saveComToJSON)
+SaveComToJsonBtn.pack()
+
+LoadComFromJsonBtn = tk.Button(big_frame2, text="Load from JSON", command=loadComFromJSON)
+LoadComFromJsonBtn.pack()
 
 update_com_ports_periodically()
 
