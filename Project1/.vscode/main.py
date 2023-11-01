@@ -45,7 +45,7 @@ def update_com_ports():
             # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
             if current_selection not in com_ports:
                 if loaded:
-                    messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected.")
+                    messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected. Check all connections and reload COM port settings.")
                     log_message(f"Caution! COM port {current_selection} could not be loaded, might be disconnected.")
                 current_selection = com_ports[0] if com_ports else ""
             
@@ -168,6 +168,8 @@ def update_square_colors():
         # Voeg anders de bestaande kleur toe
         else:
             canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
+    updateList.clear()  # Wis de lijst met update-vierkanten
+    colorList.clear()  # Wis de lijst met kleuren
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -292,7 +294,6 @@ def close_all_serial_ports():
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
-        global previous_module
         global group_size
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
@@ -319,9 +320,7 @@ def send_and_receive_data():
             elapsed_time = end_time - start_time
             label1.config(text=f"Time elapsed: {elapsed_time}")
             log_message(f"Time elapsed: {elapsed_time}")
-        update_square_colors()
-        updateList.clear()  # Wis de lijst met update-vierkanten
-        colourList.clear()  # Wis de lijst met kleuren
+        threading.Thread(update_square_colors).start()
     except IndexError:
         messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
         log_message(f"Error: COM Port for module {moduleNumber} already used")
@@ -353,8 +352,6 @@ def send_manual_data():
                 ser.write(convert_data(switch_num, signal_num))
 
                 update_square_colors()
-                updateList.clear()  # Wis de lijst met update-vierkanten
-                colorList.clear()  # Wis de lijst met kleuren
                 ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
