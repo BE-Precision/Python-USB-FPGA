@@ -870,6 +870,14 @@ button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg=
 button1.pack(side="left")
 button2.pack(side="left")
 
+
+# Voeg een blauwe balk toe aan de bovenkant van right_frame
+top_frame = tk.Frame(big_frame2, bg="RoyalBlue4")
+top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10)
+
 # Maak een frame voor de module dropdowns
 modules_frame = tk.Frame(big_frame2, bg="white")
 modules_frame.pack()
@@ -879,10 +887,12 @@ modules_frame.pack()
 module_frames = []
 dropdown_menus = []
 
-for i in range(20):
-    for j in range(6):
-        frame_com = tk.Frame(modules_frame, bg="white")
-        frame_com.grid(row=i, column=j, padx=5, pady=5)  # Gebruik .grid om frames in het raster te plaatsen
+for i in range(6):
+    frame_com2 = tk.Frame(modules_frame, bg="white")
+    frame_com2.pack(side="left")
+    for j in range(20):
+        frame_com = tk.Frame(frame_com2, bg="white")
+        frame_com.pack(padx=5, pady=5)  #Gebruik .grid om frames in het raster te plaatsen
         label_module = tk.Label(frame_com, text=f"Module {i*6 + j}", bg="white")  # Berekent de juiste module-index
         label_module.pack(side="left")
         com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
@@ -938,11 +948,14 @@ def loadComFromJSON():
         i = i+1
     loaded = 1
     update_com_ports()
-SaveComToJsonBtn = tk.Button(big_frame2, text="Save to JSON", command=saveComToJSON)
-SaveComToJsonBtn.pack()
 
-LoadComFromJsonBtn = tk.Button(big_frame2, text="Load from JSON", command=loadComFromJSON)
-LoadComFromJsonBtn.pack()
+frame_button = tk.Frame(big_frame2, bg="white")
+frame_button.pack()
+SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
+SaveComToJsonBtn.pack(pady=10, padx=10, side="left")
+
+LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
+LoadComFromJsonBtn.pack(pady=10, padx=10, side="left")
 
 update_com_ports_periodically()
 
