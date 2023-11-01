@@ -370,7 +370,7 @@ def send_manual_data():
         messagebox.showerror("Error", f"Error: {str(e)}")
         log_message(f"Error: {str(e)}")
 
-def resize_window():
+def resize_window1():
     global width
     global height
     # Haal de gewenste breedte en hoogte van main_frame op
@@ -380,14 +380,24 @@ def resize_window():
     # Pas de grootte van het venster aan
     root.geometry(f"{width}x{height}")
 
+def resize_window2():
+    # Haal de gewenste breedte en hoogte van main_frame op
+    width = big_frame2.winfo_reqwidth()+20
+    height = big_frame2.winfo_reqheight()+20
+    
+    # Pas de grootte van het venster aan
+    root.geometry(f"{width}x{height}")
+
 def switch_to_screen1():
     screen2.pack_forget()
     main_frame.pack()
     big_frame.pack()
+    resize_window1()
 
 def switch_to_screen2():
     main_frame.pack_forget()
-    screen2.pack(side="left", anchor="nw", fill=BOTH, expand=1)
+    screen2.pack()
+    resize_window2()
 
 # Create the main window
 root = tk.Tk()
@@ -760,8 +770,8 @@ def update_parameters():
     # Roep de functie aan om de waarden in de uitklapbare lijst bij te werken
     generate_group_dropdown_values()
     on_group_selection_change("<DummyEvent>")
-    resize_window()
-
+    threading.Timer(0.1, resize_window1).start()
+    
 # Voeg een updateknop toe om de parameters bij te werken
 buttons_frame = tk.Frame(left_frame, bg="white")
 buttons_frame.pack(pady=(10,5))
@@ -823,7 +833,7 @@ reset_button.pack(side="left", padx=20)
 log_scrollbar.config(command=log_text.yview)
 
 # Maak scherm 2
-screen2 = tk.Frame(root)
+screen2 = Frame(root)
 screen2.grid_remove()
 
 # Create Frame for X Scrollbar
@@ -858,7 +868,7 @@ button1.pack(side="left")
 button2.pack(side="left")
 
 # Maak een frame voor de module dropdowns
-modules_frame = tk.Frame(big_frame2)
+modules_frame = tk.Frame(big_frame2, bg="white")
 modules_frame.pack()
 
 # Voeg labels en dropdown-menu's toe voor modules
@@ -868,9 +878,9 @@ dropdown_menus = []
 
 for i in range(20):
     for j in range(6):
-        frame_com = tk.Frame(modules_frame)
+        frame_com = tk.Frame(modules_frame, bg="white")
         frame_com.grid(row=i, column=j, padx=5, pady=5)  # Gebruik .grid om frames in het raster te plaatsen
-        label_module = tk.Label(frame_com, text=f"Module {i*6 + j}")  # Berekent de juiste module-index
+        label_module = tk.Label(frame_com, text=f"Module {i*6 + j}", bg="white")  # Berekent de juiste module-index
         label_module.pack(side="left")
         com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
         com_port_dropdown.pack(side="left")
@@ -895,7 +905,7 @@ def saveComToJSON():
 
 def loadComFromJSON():
     global loaded
-    loaded =0
+    loaded = 0
     file_path=filedialog.askopenfilename()
     comList = []
     try:
