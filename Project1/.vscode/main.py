@@ -34,7 +34,7 @@ def select_com_port():
 
 # Functie om de lijst met COM-poorten dynamisch bij te werken
 def update_com_ports():
-    global loaded
+    global loaded, modules
     com_ports = get_available_com_ports()
     
     if com_ports:
@@ -772,6 +772,8 @@ def update_parameters():
     generate_group_dropdown_values()
     on_group_selection_change("<DummyEvent>")
 
+    update_modules()
+
 # Voeg een updateknop toe om de parameters bij te werken
 buttons_frame = tk.Frame(left_frame, bg="white")
 buttons_frame.pack(pady=(10,5))
@@ -887,6 +889,15 @@ for i in range(20):
         com_port_dropdown.pack(side="left")
         module_frames.append((label_module, com_port_dropdown))
         dropdown_menus.append(com_port_dropdown)
+
+def update_modules():
+    for i in range(modules, 120):
+        dropdown_menus[i].config(state="disabled")
+    
+    for i in range(modules):
+        dropdown_menus[i].config(state="readonly")
+
+update_modules()
 
 def saveComToJSON():
     comPortsFromDropdown = []
