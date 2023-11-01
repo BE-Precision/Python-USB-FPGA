@@ -893,7 +893,7 @@ for i in range(6):
     for j in range(20):
         frame_com = tk.Frame(frame_com2, bg="white")
         frame_com.pack(padx=5, pady=5)  #Gebruik .grid om frames in het raster te plaatsen
-        label_module = tk.Label(frame_com, text=f"Module {i*6 + j}", bg="white")  # Berekent de juiste module-index
+        label_module = tk.Label(frame_com, text=f"Module {i*20 + j}", bg="white")  # Berekent de juiste module-index
         label_module.pack(side="left")
         com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
         com_port_dropdown.pack(side="left")
