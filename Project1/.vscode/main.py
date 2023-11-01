@@ -717,7 +717,7 @@ def rearrange_squares():
             x1 = x0 + square_size
             y1 = y0 + square_size
             canvas.coords(square_widgets[i * grid_columns + j], x0, y0, x1, y1)
-
+            
 # Voeg een functie toe om de parameters bij te werken met de ingevoerde waarden
 def update_parameters():
     global grid_columns, group_size, modules, square_size
@@ -745,7 +745,7 @@ def update_parameters():
     square_size = int(entry_square_size.get())
 
     # Bereken het aantal groepen en de grid-rijen opnieuw
-    global grid_size, num_groups, grid_rows
+    global grid_size, num_groups, grid_rows, square_widgets
     grid_size = group_size * modules
     num_groups = grid_size // group_size
     grid_rows = grid_size // grid_columns
@@ -758,6 +758,7 @@ def update_parameters():
     canvas.config(width=canvas_width, height=canvas_height)
     show_current_group()
     resize_canvas_to_group()
+    threading.Timer(0.5, resize_window1).start()
     rearrange_squares()
 
     save_button.config(state=tk.NORMAL)
@@ -770,8 +771,7 @@ def update_parameters():
     # Roep de functie aan om de waarden in de uitklapbare lijst bij te werken
     generate_group_dropdown_values()
     on_group_selection_change("<DummyEvent>")
-    threading.Timer(0.1, resize_window1).start()
-    
+
 # Voeg een updateknop toe om de parameters bij te werken
 buttons_frame = tk.Frame(left_frame, bg="white")
 buttons_frame.pack(pady=(10,5))
@@ -812,6 +812,7 @@ def save_log():
         # Schrijf de log naar het geselecteerde bestand
         with open(file_path, 'w') as file:
             file.write(log_text.get("1.0", "end"))
+            log_message("Log saved")
 
 # Functie om de log te resetten
 def reset_log():
@@ -897,7 +898,8 @@ def saveComToJSON():
     try:
         with open(file_path, "w") as json_file:
             json.dump(comPortsFromDropdown, json_file)
-        messagebox.showinfo("Settings are saved", "Settings are saved")
+        messagebox.showinfo("Settings are saved", "COM port settings are saved")
+        log_message("COM port settings saved")
     except Exception as e:
         messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
         log_message(f"An error occured when saving: {str(e)}")
@@ -913,6 +915,7 @@ def loadComFromJSON():
             comList.clear()
             comList = json.load(json_file)
         messagebox.showinfo("Settings are loaded", "Settings are loaded")
+        log_message("COM port settings are loaded")
     except Exception as e:
         loaded = 0
         messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
