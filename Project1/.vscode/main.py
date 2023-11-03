@@ -66,7 +66,10 @@ def get_com_port_for_module(module_number):
     # Haal de index op van de module in de module_frames-lijst
     index = module_number % len(module_frames)
     com_port_dropdown = module_frames[index][1]
-    return com_port_dropdown.get()
+    if (com_port_dropdown.get() == ''):
+        return 'Wrong COM'
+    else:
+        return com_port_dropdown.get()
 
 opened_serial_ports = [None] * 256  # Maak een lijst met 256 lege waarden om COM-poorten bij te houden
 
@@ -107,7 +110,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open("Project1\.vscode\settings.json", "w") as json_file:
+        with open(".vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -118,7 +121,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height
 
     try:
-        with open("Project1\.vscode\settings.json", "r") as json_file:
+        with open(".vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -160,15 +163,13 @@ def resize_canvas_to_group():
 
 # Functie om vierkantkleuren bij te werken
 def update_square_colors():
-    for i in range(grid_size):
+    for i in range(len(updateList)):
         if i in updateList:
             canvas.itemconfig(square_widgets[i], fill=COLORS[colorList[updateList.index(i)]])
             current_square_colors[i] = COLORS[colorList[updateList.index(i)]]
         # Voeg anders de bestaande kleur toe
         else:
             canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
-    updateList.clear()  # Wis de lijst met update-vierkanten
-    colorList.clear()  # Wis de lijst met kleuren
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -277,7 +278,7 @@ def convert_data(num1, num2):
 def open_all_serial_ports():
     global ser_ports, num_groups
     ser_ports = [None] * num_groups  # Maak een lijst met None waarden voor alle modules
-    for module_number in range(num_groups):
+    for module_number in range(modules):
         if not open_ports.__contains__(get_com_port_for_module(module_number)):
             open_ports.append(get_com_port_for_module(module_number))
             ser.append(serial.Serial(get_com_port_for_module(module_number), 138400))
@@ -292,11 +293,10 @@ def close_all_serial_ports():
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
-    try:
-        global group_size
+    #try:
+        global group_size, updateList, colorList, ser_ports
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
-            global ser_ports
             open_all_serial_ports()
             csv_reader = csv.reader(csv_file, delimiter=';')
 
@@ -319,17 +319,19 @@ def send_and_receive_data():
             elapsed_time = end_time - start_time
             label1.config(text=f"Time elapsed: {elapsed_time}")
             log_message(f"Time elapsed: {elapsed_time}")
-        threading.Thread(update_square_colors).start()
-    except IndexError:
-        messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
-        log_message(f"Error: COM Port for module {moduleNumber} already used")
-    except FileNotFoundError:
-        messagebox.showerror("Error", "The selected file doesn't exist.")
-        log_message("Error: The selected file doesn't exist.")
-    except Exception as e:
-        messagebox.showerror("Error", f"Error: {str(e)}")
-        log_message(f"Error: Error: {str(e)}")
-
+            update_square_colors()
+            updateList.clear()
+            colorList.clear()
+   # except IndexError:
+   #     messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
+   #     log_message(f"Error: COM Port for module {moduleNumber} already used")
+   # except FileNotFoundError:
+   #     messagebox.showerror("Error", "The selected file doesn't exist.")
+   #     log_message("Error: The selected file doesn't exist.")
+   # except Exception as e:
+   #     messagebox.showerror("Error", f"Error: {str(e)}")
+   #     log_message(f"Error: Error: {str(e)}")
+#
 # Function to send manually entered data
 def send_manual_data():
     try:
@@ -365,6 +367,7 @@ def send_manual_data():
     except Exception as e:
         messagebox.showerror("Error", f"Error: {str(e)}")
         log_message(f"Error: {str(e)}")
+        ser.close()
 
 def resize_window1():
     global width
@@ -398,7 +401,7 @@ def switch_to_screen2():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
+root.iconbitmap(".vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
