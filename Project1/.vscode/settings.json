@@ -1,8 +1,8 @@
 {
-    "grid_columns": 25,
-    "group_size": 250,
-    "modules": 120,
-    "square_size": 15,
+    "grid_columns": 10,
+    "group_size": 50,
+    "modules": 2,
+    "square_size": 30,
     "COLORS": [
         "#00ff80",
         "red",

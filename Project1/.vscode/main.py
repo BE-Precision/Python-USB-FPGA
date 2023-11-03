@@ -29,7 +29,6 @@ def get_available_com_ports():
 def select_com_port():
     com_ports = get_available_com_ports()
     if com_ports:
-        port_selection.set(com_ports[0])  # Stel standaard de eerste beschikbare COM-poort in
         com_port_dropdown['values'] = com_ports
 
 # Functie om de lijst met COM-poorten dynamisch bij te werken
@@ -47,7 +46,7 @@ def update_com_ports():
                 if loaded:
                     messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected. Check all connections and reload COM port settings.")
                     log_message(f"Caution! COM port {current_selection} could not be loaded, might be disconnected.")
-                current_selection = com_ports[0] if com_ports else ""
+                current_selection =  ""
             
             # Bijwerken van de dropdown-menu met de juiste waarden
             com_port_dropdown['values'] = com_ports
@@ -948,11 +947,17 @@ def loadComFromJSON():
 
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
+
+var2 = tk.IntVar(value=0)
+# Maak het selectievakje en koppel het aan de variabele var
+reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
+reoccurring_COM.pack(side="left", padx=(0,400))
+
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
 SaveComToJsonBtn.pack(pady=10, padx=10, side="left")
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
-LoadComFromJsonBtn.pack(pady=10, padx=10, side="left")
+LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
 
