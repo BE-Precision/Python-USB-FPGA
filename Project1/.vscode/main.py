@@ -349,13 +349,12 @@ def send_manual_data():
                 colorList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
                 ser.write(convert_data(switch_num, signal_num))
-
-                update_square_colors()
                 ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
                 log_message(f"Time elapsed: {elapsed_time}")
+                update_square_colors()
             else:
                 messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
