@@ -110,7 +110,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open(".vscode\settings.json", "w") as json_file:
+        with open("Project1\.vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -121,7 +121,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height
 
     try:
-        with open(".vscode\settings.json", "r") as json_file:
+        with open("Project1\.vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -163,13 +163,15 @@ def resize_canvas_to_group():
 
 # Functie om vierkantkleuren bij te werken
 def update_square_colors():
-    for i in range(len(updateList)):
+    for i in range(grid_size):
         if i in updateList:
             canvas.itemconfig(square_widgets[i], fill=COLORS[colorList[updateList.index(i)]])
             current_square_colors[i] = COLORS[colorList[updateList.index(i)]]
         # Voeg anders de bestaande kleur toe
         else:
             canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
+    updateList.clear()
+    colorList.clear()
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -293,7 +295,7 @@ def close_all_serial_ports():
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
-    #try:
+    try:
         global group_size, updateList, colorList, ser_ports
         start_time = time.time()  # Start the timer
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
@@ -314,24 +316,22 @@ def send_and_receive_data():
                         log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
                         close_all_serial_ports()
                         return
-            close_all_serial_ports()
             end_time = time.time()  # Stop the timer
             elapsed_time = end_time - start_time
             label1.config(text=f"Time elapsed: {elapsed_time}")
             log_message(f"Time elapsed: {elapsed_time}")
+            close_all_serial_ports()
             update_square_colors()
-            updateList.clear()
-            colorList.clear()
-   # except IndexError:
-   #     messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
-   #     log_message(f"Error: COM Port for module {moduleNumber} already used")
-   # except FileNotFoundError:
-   #     messagebox.showerror("Error", "The selected file doesn't exist.")
-   #     log_message("Error: The selected file doesn't exist.")
-   # except Exception as e:
-   #     messagebox.showerror("Error", f"Error: {str(e)}")
-   #     log_message(f"Error: Error: {str(e)}")
-#
+    except IndexError:
+        messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
+        log_message(f"Error: COM Port for module {moduleNumber} already used")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "The selected file doesn't exist.")
+        log_message("Error: The selected file doesn't exist.")
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: Error: {str(e)}")
+
 # Function to send manually entered data
 def send_manual_data():
     try:
@@ -400,7 +400,7 @@ def switch_to_screen2():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap(".vscode\BEPTLogo.ico")
+root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -523,11 +523,6 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
 
     color_label = tk.Label(signal_frame, text=label, bg="white")
     color_label.pack(side="left", padx=(0,10))  # Plaats het label links in het frame
-
-def update_all_square_colors():
-    for i in range(len(square_widgets)):
-        square_id = square_widgets[i]
-        canvas.itemconfig(square_id, fill=COLORS[colorList[i]])
 
 # Functie om de kleur van een signaal te wijzigen
 def change_signal_color(signal):
