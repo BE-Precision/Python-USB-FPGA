@@ -25,12 +25,6 @@ def get_available_com_ports():
     com_ports = [port.device for port in list_ports.comports()]
     return com_ports
 
-# Functie om een COM-poort te selecteren
-def select_com_port():
-    com_ports = get_available_com_ports()
-    if com_ports:
-        com_port_dropdown['values'] = com_ports
-
 # Functie om de lijst met COM-poorten dynamisch bij te werken
 def update_com_ports():
     global loaded, modules
@@ -165,11 +159,10 @@ def resize_canvas_to_group():
 def update_square_colors():
     for i in range(grid_size):
         if i in updateList:
-            canvas.itemconfig(square_widgets[i], fill=COLORS[colorList[updateList.index(i)]])
-            current_square_colors[i] = COLORS[colorList[updateList.index(i)]]
-        # Voeg anders de bestaande kleur toe
-        else:
-            canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
+            color_index = colorList[updateList.index(i)]
+            new_color = COLORS[color_index]
+            canvas.itemconfig(square_widgets[i], fill=new_color)
+            current_square_colors[i] = new_color
     updateList.clear()
     colorList.clear()
 
@@ -238,43 +231,26 @@ def selectFile():
             messagebox.showerror("Error", "Select a valid CSV file")
             log_message("Error: Select a valid CSV file")
 
-def convert_to_binary(number):
-    # Functie om een getal naar een binaire representatie om te zetten
-    binary_str = bin(int(number))[2:]
-    return binary_str
-
-def convert_to_binary2(number):
-    # Functie om een getal naar een binaire representatie om te zetten
-    binary_str = format(int(number), '02b')  # Zorg voor een binaire reeks van 2 bits
-    return binary_str
-
-def swap_last_two_bits(binary_str):
-    # Functie om de laatste twee bits van een binaire string om te wisselen
-    if len(binary_str) >= 2:
-        return binary_str[:-2] + binary_str[-1] + binary_str[-2]
-    return binary_str
-
 def convert_data(num1, num2):
-    # Functie om de data achter elkaar te plakken in de juiste volgorde
-
     # Zet de getallen om naar binaire representaties
-    binary_num1 = convert_to_binary(num1%group_size)
-    binary_num2 = convert_to_binary2(num2)
+    binary_num1 = format(num1 % group_size, 'b')
+    binary_num2 = format(num2, '02b')  # Zorg voor een binaire reeks van 2 bits
 
-    # Combineer de binaire getallen
-    combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
+    # Wissel de laatste twee bits van binary_num2
+    binary_num2 = binary_num2[-1] + binary_num2[0]
 
-    myBytes = bytearray()
+    combined_binary = binary_num1 + binary_num2
 
-    if var.get()==1:
+    myBytes = []
+
+    if var.get() == 1:
         log_message(f"Switch: {num1}, Signal: {num2}, Binary: {combined_binary}")
-    
+
     for i in range(0, len(combined_binary), 8):
         chunk = combined_binary[i:i + 8]
         myBytes.append(int(chunk, 2))
-    
-    return myBytes
 
+    return myBytes
 
 # Functie om alle seriële poorten te openen
 def open_all_serial_ports():
@@ -945,13 +921,13 @@ def loadComFromJSON():
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
 
-var2 = tk.IntVar(value=0)
+#var2 = tk.IntVar(value=0)
 # Maak het selectievakje en koppel het aan de variabele var
-reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
-reoccurring_COM.pack(side="left", padx=(0,400))
+#reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
+#reoccurring_COM.pack(side="left")
 
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
-SaveComToJsonBtn.pack(pady=10, padx=10, side="left")
+SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
