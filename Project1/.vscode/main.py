@@ -223,10 +223,10 @@ def selectFile():
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
-        button.config(state=tk.NORMAL)  # Activeer de "Send" knop
+        convert_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
     else:
         file_label.config(text="Selected file: Not yet selected")
-        button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
+        convert_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
         if file_path:
             messagebox.showerror("Error", "Select a valid CSV file")
             log_message("Error: Select a valid CSV file")
@@ -272,41 +272,80 @@ def close_all_serial_ports():
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
-        global group_size, updateList, colorList, ser_ports
+        global group_size, updateList, colorList, ser_ports, converted_data_list, module_list
+        button.config(state=tk.DISABLED)
         start_time = time.time()  # Start the timer
-        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
-            open_all_serial_ports()
-            csv_reader = csv.reader(csv_file, delimiter=';')
+        open_all_serial_ports()
 
-            for row in csv_reader:
-                if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
-                    num1 = int(row[0])
-                    num2 = int(row[1])
-                    moduleNumber = int(num1/group_size)
-                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
-                        updateList.append(num1)
-                        colorList.append(num2)
-                        ser[moduleNumber].write(convert_data(num1, num2))
-                    else:
-                        messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
-                        log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
-                        close_all_serial_ports()
-                        return
-            end_time = time.time()  # Stop the timer
-            elapsed_time = end_time - start_time
-            label1.config(text=f"Time elapsed: {elapsed_time}")
-            log_message(f"Time elapsed: {elapsed_time}")
-            close_all_serial_ports()
-            update_square_colors()
+        for i in range(len(converted_data_list)):
+            moduleNumber = module_list[i]
+            ser[moduleNumber].write(converted_data_list[i])
+            
+        end_time = time.time()  # Stop the timer
+        elapsed_time = end_time - start_time
+        label1.config(text=f"Time elapsed: {elapsed_time}")
+        log_message(f"Time elapsed: {elapsed_time}")
+        close_all_serial_ports()
+        update_square_colors()
+        button.config(state=tk.NORMAL)
     except IndexError:
         messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
         log_message(f"Error: COM Port for module {moduleNumber} already used")
+        button.config(state=tk.NORMAL)
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: {str(e)}")
+        button.config(state=tk.NORMAL)
+        ser.clear()
+        open_ports.clear()
+#
+# Lijst om geconverteerde gegevens op te slaan
+converted_data_list = []
+module_list = []
+# Functie om gegevens te converteren vanuit een CSV-bestand
+def convert_data_from_csv():
+    try:
+        global converted_data_list, updateList, colorList, group_size
+        updateList.clear()
+        colorList.clear()
+        converted_data_list.clear()
+        module_list.clear()
+        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=';')
+            button_send_manual.config(state=tk.DISABLED)
+            cancel_button.config(state=tk.NORMAL)
+            for row in csv_reader:
+                if len(row) >= 2:
+                    num1 = int(row[0])
+                    num2 = int(row[1])
+                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
+                        updateList.append(num1)
+                        colorList.append(num2)
+                        converted_data = convert_data(num1, num2)
+                        converted_data_list.append(converted_data)
+                        moduleNumber = int(num1/group_size)
+                        module_list.append(moduleNumber)
+                    button.config(state=tk.NORMAL)
+                    convert_button.config(state=tk.DISABLED)
+                else:
+                    messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
+                    log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
+                    return                        
     except FileNotFoundError:
         messagebox.showerror("Error", "The selected file doesn't exist.")
         log_message("Error: The selected file doesn't exist.")
     except Exception as e:
         messagebox.showerror("Error", f"Error: {str(e)}")
         log_message(f"Error: Error: {str(e)}")
+
+def cancel():
+    global updateList, colorList
+    updateList.clear()
+    colorList.clear()
+    button.config(state=tk.DISABLED)
+    button_send_manual.config(state=tk.NORMAL)
+    cancel_button.config(state=tk.DISABLED)
+    convert_button.config(state=tk.NORMAL)
 
 # Function to send manually entered data
 def send_manual_data():
@@ -533,11 +572,21 @@ button.pack(side="left", padx=(10,0))
 file_label = tk.Label(file_frame, text="Selected file: Not yet selected", bg="white")
 file_label.pack(side="left")
 
+buttons_frame = tk.Frame(left_frame, bg="white")
+buttons_frame.pack(pady=(10,0))
+
+convert_button = tk.Button(buttons_frame, text="Convert Data", command=convert_data_from_csv)
+convert_button.config(state=tk.DISABLED)
+convert_button.pack(side="left", padx=10)
+
 # Create a button
-button = tk.Button(left_frame, text="Send!", command=button_click)
-if file_label.cget("text") == "Geselecteerd bestand: Nog niet geselecteerd":
-    button.config(state=tk.DISABLED)  # Deactiveer de knop
-button.pack()
+button = tk.Button(buttons_frame, text="Send!", command=button_click)
+button.config(state=tk.DISABLED)  # Deactiveer de knop
+button.pack(side="left")
+
+cancel_button = tk.Button(left_frame, text="Cancel", command=cancel)
+cancel_button.config(state=tk.DISABLED)  # Deactiveer de knop
+cancel_button.pack(pady=(10,0))
 
 # Create a label
 label1 = tk.Label(left_frame, text="Time elapsed: 0", bg="white")
