@@ -25,12 +25,6 @@ def get_available_com_ports():
     com_ports = [port.device for port in list_ports.comports()]
     return com_ports
 
-# Functie om een COM-poort te selecteren
-def select_com_port():
-    com_ports = get_available_com_ports()
-    if com_ports:
-        com_port_dropdown['values'] = com_ports
-
 # Functie om de lijst met COM-poorten dynamisch bij te werken
 def update_com_ports():
     global loaded, modules
@@ -110,7 +104,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open(".vscode\settings.json", "w") as json_file:
+        with open("Project1\.vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -121,7 +115,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height
 
     try:
-        with open(".vscode\settings.json", "r") as json_file:
+        with open("Project1\.vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -163,13 +157,14 @@ def resize_canvas_to_group():
 
 # Functie om vierkantkleuren bij te werken
 def update_square_colors():
-    for i in range(len(updateList)):
+    for i in range(grid_size):
         if i in updateList:
-            canvas.itemconfig(square_widgets[i], fill=COLORS[colorList[updateList.index(i)]])
-            current_square_colors[i] = COLORS[colorList[updateList.index(i)]]
-        # Voeg anders de bestaande kleur toe
-        else:
-            canvas.itemconfig(square_widgets[i], fill=current_square_colors[i])
+            color_index = colorList[updateList.index(i)]
+            new_color = COLORS[color_index]
+            canvas.itemconfig(square_widgets[i], fill=new_color)
+            current_square_colors[i] = new_color
+    updateList.clear()
+    colorList.clear()
 
 # Voeg tooltips toe aan het canvas
 tooltips = []  # Lijst om tooltips bij te houden
@@ -228,51 +223,34 @@ def selectFile():
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
-        button.config(state=tk.NORMAL)  # Activeer de "Send" knop
+        convert_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
     else:
         file_label.config(text="Selected file: Not yet selected")
-        button.config(state=tk.DISABLED)  # Deactiveer de "Send" knop als er geen bestand is geselecteerd
+        convert_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
         if file_path:
             messagebox.showerror("Error", "Select a valid CSV file")
             log_message("Error: Select a valid CSV file")
 
-def convert_to_binary(number):
-    # Functie om een getal naar een binaire representatie om te zetten
-    binary_str = bin(int(number))[2:]
-    return binary_str
-
-def convert_to_binary2(number):
-    # Functie om een getal naar een binaire representatie om te zetten
-    binary_str = format(int(number), '02b')  # Zorg voor een binaire reeks van 2 bits
-    return binary_str
-
-def swap_last_two_bits(binary_str):
-    # Functie om de laatste twee bits van een binaire string om te wisselen
-    if len(binary_str) >= 2:
-        return binary_str[:-2] + binary_str[-1] + binary_str[-2]
-    return binary_str
-
 def convert_data(num1, num2):
-    # Functie om de data achter elkaar te plakken in de juiste volgorde
-
     # Zet de getallen om naar binaire representaties
-    binary_num1 = convert_to_binary(num1%group_size)
-    binary_num2 = convert_to_binary2(num2)
+    binary_num1 = format(num1 % group_size, 'b')
+    binary_num2 = format(num2, '02b')  # Zorg voor een binaire reeks van 2 bits
 
-    # Combineer de binaire getallen
-    combined_binary = binary_num1 + swap_last_two_bits(binary_num2)  # Wissel de laatste twee bits van binary_num2
+    # Wissel de laatste twee bits van binary_num2
+    binary_num2 = binary_num2[-1] + binary_num2[0]
 
-    myBytes = bytearray()
+    combined_binary = binary_num1 + binary_num2
 
-    if var.get()==1:
+    myBytes = []
+
+    if var.get() == 1:
         log_message(f"Switch: {num1}, Signal: {num2}, Binary: {combined_binary}")
-    
+
     for i in range(0, len(combined_binary), 8):
         chunk = combined_binary[i:i + 8]
         myBytes.append(int(chunk, 2))
-    
-    return myBytes
 
+    return myBytes
 
 # Functie om alle seriële poorten te openen
 def open_all_serial_ports():
@@ -293,45 +271,82 @@ def close_all_serial_ports():
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
-    #try:
-        global group_size, updateList, colorList, ser_ports
+    try:
+        global group_size, updateList, colorList, ser_ports, converted_data_list, module_list
+        button.config(state=tk.DISABLED)
         start_time = time.time()  # Start the timer
-        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
-            open_all_serial_ports()
-            csv_reader = csv.reader(csv_file, delimiter=';')
+        open_all_serial_ports()
 
+        for i in range(len(converted_data_list)):
+            moduleNumber = module_list[i]
+            ser[moduleNumber].write(converted_data_list[i])
+            
+        end_time = time.time()  # Stop the timer
+        elapsed_time = end_time - start_time
+        label1.config(text=f"Time elapsed: {elapsed_time}")
+        log_message(f"Time elapsed: {elapsed_time}")
+        close_all_serial_ports()
+        update_square_colors()
+        button.config(state=tk.NORMAL)
+    except IndexError:
+        messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
+        log_message(f"Error: COM Port for module {moduleNumber} already used")
+        button.config(state=tk.NORMAL)
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: {str(e)}")
+        button.config(state=tk.NORMAL)
+        ser.clear()
+        open_ports.clear()
+#
+# Lijst om geconverteerde gegevens op te slaan
+converted_data_list = []
+module_list = []
+# Functie om gegevens te converteren vanuit een CSV-bestand
+def convert_data_from_csv():
+    try:
+        global converted_data_list, updateList, colorList, group_size
+        updateList.clear()
+        colorList.clear()
+        converted_data_list.clear()
+        module_list.clear()
+        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=';')
+            button_send_manual.config(state=tk.DISABLED)
+            cancel_button.config(state=tk.NORMAL)
             for row in csv_reader:
-                if len(row) >= 2:  # Controleer of er minstens 2 kolommen in de rij zijn
+                if len(row) >= 2:
                     num1 = int(row[0])
                     num2 = int(row[1])
-                    moduleNumber = int(num1/group_size)
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
                         updateList.append(num1)
                         colorList.append(num2)
-                        ser[moduleNumber].write(convert_data(num1, num2))
-                    else:
-                        messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
-                        log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
-                        close_all_serial_ports()
-                        return
-            close_all_serial_ports()
-            end_time = time.time()  # Stop the timer
-            elapsed_time = end_time - start_time
-            label1.config(text=f"Time elapsed: {elapsed_time}")
-            log_message(f"Time elapsed: {elapsed_time}")
-            update_square_colors()
-            updateList.clear()
-            colorList.clear()
-   # except IndexError:
-   #     messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
-   #     log_message(f"Error: COM Port for module {moduleNumber} already used")
-   # except FileNotFoundError:
-   #     messagebox.showerror("Error", "The selected file doesn't exist.")
-   #     log_message("Error: The selected file doesn't exist.")
-   # except Exception as e:
-   #     messagebox.showerror("Error", f"Error: {str(e)}")
-   #     log_message(f"Error: Error: {str(e)}")
-#
+                        converted_data = convert_data(num1, num2)
+                        converted_data_list.append(converted_data)
+                        moduleNumber = int(num1/group_size)
+                        module_list.append(moduleNumber)
+                    button.config(state=tk.NORMAL)
+                    convert_button.config(state=tk.DISABLED)
+                else:
+                    messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
+                    log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
+                    return                        
+    except FileNotFoundError:
+        messagebox.showerror("Error", "The selected file doesn't exist.")
+        log_message("Error: The selected file doesn't exist.")
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: Error: {str(e)}")
+
+def cancel():
+    global updateList, colorList
+    updateList.clear()
+    colorList.clear()
+    button.config(state=tk.DISABLED)
+    button_send_manual.config(state=tk.NORMAL)
+    cancel_button.config(state=tk.DISABLED)
+    convert_button.config(state=tk.NORMAL)
+
 # Function to send manually entered data
 def send_manual_data():
     try:
@@ -351,13 +366,12 @@ def send_manual_data():
                 colorList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
                 ser.write(convert_data(switch_num, signal_num))
-
-                update_square_colors()
                 ser.close()
                 end_time = time.time()  # Stop the timer
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
                 log_message(f"Time elapsed: {elapsed_time}")
+                update_square_colors()
             else:
                 messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
@@ -401,7 +415,7 @@ def switch_to_screen2():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap(".vscode\BEPTLogo.ico")
+root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -525,11 +539,6 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
     color_label = tk.Label(signal_frame, text=label, bg="white")
     color_label.pack(side="left", padx=(0,10))  # Plaats het label links in het frame
 
-def update_all_square_colors():
-    for i in range(len(square_widgets)):
-        square_id = square_widgets[i]
-        canvas.itemconfig(square_id, fill=COLORS[colorList[i]])
-
 # Functie om de kleur van een signaal te wijzigen
 def change_signal_color(signal):
     # Use the colorchooser module to pick a color
@@ -563,11 +572,21 @@ button.pack(side="left", padx=(10,0))
 file_label = tk.Label(file_frame, text="Selected file: Not yet selected", bg="white")
 file_label.pack(side="left")
 
+buttons_frame = tk.Frame(left_frame, bg="white")
+buttons_frame.pack(pady=(10,0))
+
+convert_button = tk.Button(buttons_frame, text="Convert Data", command=convert_data_from_csv)
+convert_button.config(state=tk.DISABLED)
+convert_button.pack(side="left", padx=10)
+
 # Create a button
-button = tk.Button(left_frame, text="Send!", command=button_click)
-if file_label.cget("text") == "Geselecteerd bestand: Nog niet geselecteerd":
-    button.config(state=tk.DISABLED)  # Deactiveer de knop
-button.pack()
+button = tk.Button(buttons_frame, text="Send!", command=button_click)
+button.config(state=tk.DISABLED)  # Deactiveer de knop
+button.pack(side="left")
+
+cancel_button = tk.Button(left_frame, text="Cancel", command=cancel)
+cancel_button.config(state=tk.DISABLED)  # Deactiveer de knop
+cancel_button.pack(pady=(10,0))
 
 # Create a label
 label1 = tk.Label(left_frame, text="Time elapsed: 0", bg="white")
@@ -951,13 +970,13 @@ def loadComFromJSON():
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
 
-var2 = tk.IntVar(value=0)
+#var2 = tk.IntVar(value=0)
 # Maak het selectievakje en koppel het aan de variabele var
-reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
-reoccurring_COM.pack(side="left", padx=(0,400))
+#reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
+#reoccurring_COM.pack(side="left")
 
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
-SaveComToJsonBtn.pack(pady=10, padx=10, side="left")
+SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
