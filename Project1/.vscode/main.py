@@ -215,15 +215,21 @@ def update_square_tooltips(event):
 
 # Function to be called when the button is clicked
 def button_click():
+    global converted
+    converted = 1
     threading.Thread(target=send_and_receive_data).start()
+
+converted = 0
 
 # Voeg een functie toe om een bestand te selecteren
 def selectFile():
-    global file_path
+    global file_path, converted
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
         convert_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
+        button.config(state=DISABLED)
+        converted = 0
     else:
         file_label.config(text="Selected file: Not yet selected")
         convert_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
@@ -286,7 +292,8 @@ def send_and_receive_data():
         label1.config(text=f"Time elapsed: {elapsed_time}")
         log_message(f"Time elapsed: {elapsed_time}")
         close_all_serial_ports()
-        update_square_colors()
+        if var2.get() == 1:
+            update_square_colors()
         button.config(state=tk.NORMAL)
     except IndexError:
         messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
@@ -298,16 +305,15 @@ def send_and_receive_data():
         button.config(state=tk.NORMAL)
         ser.clear()
         open_ports.clear()
-#
+
 # Lijst om geconverteerde gegevens op te slaan
 converted_data_list = []
 module_list = []
+
 # Functie om gegevens te converteren vanuit een CSV-bestand
 def convert_data_from_csv():
     try:
-        global converted_data_list, updateList, colorList, group_size
-        updateList.clear()
-        colorList.clear()
+        global converted_data_list, updateList, colorList, group_size, converted
         converted_data_list.clear()
         module_list.clear()
         with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
@@ -319,8 +325,14 @@ def convert_data_from_csv():
                     num1 = int(row[0])
                     num2 = int(row[1])
                     if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
-                        updateList.append(num1)
-                        colorList.append(num2)
+                        if num1 in updateList:
+                            # Vind de positie van num1 in updateList
+                            index = updateList.index(num1)
+                            # Overschrijf num2 op dezelfde positie in colorList
+                            colorList[index] = num2
+                        else:
+                            updateList.append(num1)
+                            colorList.append(num2)
                         converted_data = convert_data(num1, num2)
                         converted_data_list.append(converted_data)
                         moduleNumber = int(num1/group_size)
@@ -340,8 +352,9 @@ def convert_data_from_csv():
 
 def cancel():
     global updateList, colorList
-    updateList.clear()
-    colorList.clear()
+    if var2.get() == 1 | converted == 0:
+        updateList.clear()
+        colorList.clear()
     button.config(state=tk.DISABLED)
     button_send_manual.config(state=tk.NORMAL)
     cancel_button.config(state=tk.DISABLED)
@@ -362,8 +375,14 @@ def send_manual_data():
 
             if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
                 ser = open_serial_port_for_switch(switch_num)
-                updateList.append(switch_num)
-                colorList.append(signal_num)
+                if switch_num in updateList:
+                    # Vind de positie van num1 in updateList
+                    index = updateList.index(switch_num)
+                    # Overschrijf num2 op dezelfde positie in colorList
+                    colorList[index] = signal_num
+                else:
+                    updateList.append(switch_num)
+                    colorList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
                 ser.write(convert_data(switch_num, signal_num))
                 ser.close()
@@ -371,7 +390,8 @@ def send_manual_data():
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
                 log_message(f"Time elapsed: {elapsed_time}")
-                update_square_colors()
+                if var2.get() == 1:
+                    update_square_colors()
             else:
                 messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
@@ -690,6 +710,19 @@ generate_group_dropdown_values()  # Genereer de waarden voor de uitklapbare lijs
 group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
 group_dropdown.pack(side="left", anchor="nw")
 
+update_colors_button = tk.Button(number_frame, text="Update colors", command=update_square_colors)
+update_colors_button.pack(side="left", padx=(50,20))
+
+def toggle_button():
+    if update_colors_button["state"] == NORMAL:
+        update_colors_button.configure(state=DISABLED)
+    else:
+        update_colors_button.configure(state=NORMAL)
+var2 = tk.IntVar(value=0)
+auto_update = tk.Checkbutton(number_frame, text="Update colors automatically", variable=var2, bg="white", command=toggle_button)
+auto_update.pack(side="left")
+
+
 # Standaard weergave van de huidige groep
 show_current_group()
 
@@ -970,11 +1003,6 @@ def loadComFromJSON():
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
 
-#var2 = tk.IntVar(value=0)
-# Maak het selectievakje en koppel het aan de variabele var
-#reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
-#reoccurring_COM.pack(side="left")
-
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
@@ -982,6 +1010,6 @@ LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=load
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
-
+update_parameters()
 # Start the main loop
 root.mainloop()
