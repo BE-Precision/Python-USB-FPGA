@@ -217,11 +217,9 @@ def update_square_tooltips(event):
 def button_click():
     threading.Thread(target=convert_data_from_csv).start()
 
-converted = 0
-
 # Voeg een functie toe om een bestand te selecteren
 def selectFile():
-    global file_path, converted
+    global file_path
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
@@ -308,7 +306,7 @@ def convert_data_from_csv():
     global converted_data
     if converted_data == 0:
         try:
-            global converted_data_list, updateList, colorList, group_size, converted
+            global converted_data_list, updateList, colorList, group_size
             converted_data_list.clear()
             module_list.clear()
             with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
@@ -987,5 +985,6 @@ LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
 update_parameters()
+save_button.config(state=DISABLED)
 # Start the main loop
 root.mainloop()
