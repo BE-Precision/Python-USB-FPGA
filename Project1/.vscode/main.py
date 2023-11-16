@@ -265,7 +265,7 @@ def open_all_serial_ports():
     for module_number in range(modules):
         if not open_ports.__contains__(get_com_port_for_module(module_number)):
             open_ports.append(get_com_port_for_module(module_number))
-            ser.append(serial.Serial(get_com_port_for_module(module_number), 138400))
+            ser.append(serial.Serial(get_com_port_for_module(module_number), baudrate=1843200))
 
 # Functie om alle seriële poorten te sluiten
 def close_all_serial_ports():
