@@ -91,6 +91,40 @@ square_size = 15  # Grootte van elk vierkantje
 width = 10
 height = 10
 
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip = None
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
+        self.widget.bind("<Motion>", self.on_motion)
+
+    def show_tooltip(self, event):
+        x = event.x_root + 20
+        y = event.y_root + 20
+        self.tooltip = tk.Toplevel(self.widget)
+        self.tooltip.wm_overrideredirect(True)
+        self.tooltip.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
+        label.pack()
+
+    def hide_tooltip(self):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def on_enter(self, event):
+        self.show_tooltip(event)
+
+    def on_leave(self, event):
+        self.hide_tooltip()
+
+    def on_motion(self, event):
+        if self.tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip.geometry(f"+{x}+{y}")
 
 def save_parameters_to_json():
     parameters = {
@@ -536,6 +570,7 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
 
     color_box = tk.Canvas(signal_frame, width=30, height=30, bg=color)
     color_box.pack(side="left")  # Plaats het kleurvak links in het frame
+    tooltip = Tooltip(color_box, "Click to change color.")
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
 
@@ -695,6 +730,8 @@ def toggle_button():
 var2 = tk.IntVar(value=0)
 auto_update = tk.Checkbutton(number_frame, text="Update colors automatically", variable=var2, bg="white", command=toggle_button)
 auto_update.pack(side="left")
+
+tooltip = Tooltip(auto_update, "Activating this option might introduce a delay when sending files.")
 
 
 # Standaard weergave van de huidige groep
