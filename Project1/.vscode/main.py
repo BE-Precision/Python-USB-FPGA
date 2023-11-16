@@ -96,35 +96,50 @@ class Tooltip:
         self.widget = widget
         self.text = text
         self.tooltip = None
+        self.show_tooltip = True  # Toont de tooltips standaard
+
         self.widget.bind("<Enter>", self.on_enter)
         self.widget.bind("<Leave>", self.on_leave)
         self.widget.bind("<Motion>", self.on_motion)
 
-    def show_tooltip(self, event):
-        x = event.x_root + 20
-        y = event.y_root + 20
-        self.tooltip = tk.Toplevel(self.widget)
-        self.tooltip.wm_overrideredirect(True)
-        self.tooltip.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
-        label.pack()
+    def toggle_tooltip(self):
+        self.show_tooltip = not self.show_tooltip
+        if not self.show_tooltip and self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
 
-    def hide_tooltip(self):
+    def show_tooltip_popup(self, event):
+        if self.show_tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip = tk.Toplevel(self.widget)
+            self.tooltip.wm_overrideredirect(True)
+            self.tooltip.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
+            label.pack()
+
+    def hide_tooltip_popup(self):
         if self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
 
     def on_enter(self, event):
-        self.show_tooltip(event)
+        self.show_tooltip_popup(event)
 
     def on_leave(self, event):
-        self.hide_tooltip()
+        self.hide_tooltip_popup()
 
     def on_motion(self, event):
         if self.tooltip:
             x = event.x_root + 20
             y = event.y_root + 20
             self.tooltip.geometry(f"+{x}+{y}")
+
+tooltips2 = []  # Maak een lijst om de tooltips op te slaan
+
+def toggle_tooltips():
+    for tooltip in tooltips2:
+        tooltip.toggle_tooltip()
 
 def save_parameters_to_json():
     parameters = {
@@ -570,7 +585,8 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
 
     color_box = tk.Canvas(signal_frame, width=30, height=30, bg=color)
     color_box.pack(side="left")  # Plaats het kleurvak links in het frame
-    tooltip = Tooltip(color_box, "Click to change color.")
+    tooltip1 = Tooltip(color_box, "Click to change color.")
+    tooltips2.append(tooltip1)
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
 
@@ -731,7 +747,8 @@ var2 = tk.IntVar(value=0)
 auto_update = tk.Checkbutton(number_frame, text="Update colors automatically", variable=var2, bg="white", command=toggle_button)
 auto_update.pack(side="left")
 
-tooltip = Tooltip(auto_update, "Activating this option might introduce a delay when sending files.")
+tooltip2 = Tooltip(auto_update, "Activating this option might introduce a delay when sending files.")
+tooltips2.append(tooltip2)
 
 
 # Standaard weergave van de huidige groep
@@ -769,6 +786,9 @@ label_square_size.pack(side="left")
 entry_square_size = tk.Entry(size_frame)
 entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
 entry_square_size.pack(side="left")
+
+tooltip_checkbox = tk.Checkbutton(left_frame, text="Show Tooltips", command=toggle_tooltips, bg="white")
+tooltip_checkbox.pack(padx=(0,110))
 
 def rearrange_squares():
     # Herverdeel de vierkanten op het nieuwe raster
