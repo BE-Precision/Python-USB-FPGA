@@ -180,34 +180,30 @@ def hide_square_tooltip(event):
         tooltip.destroy()
     tooltips.clear()
 
-# Functie om een tooltip voor een specifiek vierkant weer te geven
+def update_tooltip_position(event):
+    if tooltips:
+        x, y = event.x_root + 20, event.y_root + 20  # Voeg een offset toe voor de positie
+        for tooltip in tooltips:
+            tooltip.wm_geometry(f"+{x}+{y}")  # Verplaats de tooltip naar de nieuwe positie
+
 def show_square_tooltip_for_square(event, square):
-    x, y = event.x_root, event.y_root  # Gebruik x_root en y_root voor absolute schermcoördinaten
     square_tooltip_text = f"Switch {square-1}"
 
-    # Controleer eerst of er al een tooltip voor dit vierkant bestaat
+    # Controleer of de tooltip al bestaat voor dit vierkant
     for tooltip in tooltips:
         if tooltip.square == square:
             return  # Tooltip bestaat al voor dit vierkant
 
-    # Pas de positie aan om dichter bij de muis te zijn
-    offset_x = 10
-    offset_y = 10
-    x += offset_x
-    y += offset_y
-
-    # Toon de tooltip in een Toplevel-venster
     tw = Toplevel(root)
     tw.wm_overrideredirect(1)
-    tw.wm_geometry(f"+{x}+{y}")
-    label = Label(tw, text=square_tooltip_text, justify=LEFT,
-                  background="#ffffe0", relief=SOLID, borderwidth=1,
-                  font=("tahoma", "8", "normal"))
+    tw.configure(background="#ffffe0", relief=SOLID, borderwidth=1)
+    label = Label(tw, text=square_tooltip_text, justify=LEFT, font=("tahoma", "8", "normal"))
     label.pack(ipadx=1)
 
-    # Voeg de tooltip toe aan de lijst
     tooltips.append(tw)
     tw.square = square  # Voeg een attribuut 'square' toe aan het Toplevel-venster
+
+    update_tooltip_position(event)  # Positie instellen voor de tooltip
 
 # Functie om de tooltips voor het huidige vierkant te tonen en te verbergen voor anderen
 def update_square_tooltips(event):
@@ -431,6 +427,9 @@ port_selection = StringVar(root)
 
 var3 = tk.IntVar(value=0)
 var3.set(var3_value)  # Set the value of the checkbox
+
+# Event-binding om de tooltips mee te laten bewegen met de muis
+root.bind("<Motion>", update_tooltip_position)
 
 class Tooltip:
     def __init__(self, widget, text):
