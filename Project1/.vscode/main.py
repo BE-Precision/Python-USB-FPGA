@@ -91,7 +91,6 @@ square_size = 15  # Grootte van elk vierkantje
 width = 10
 height = 10
 
-
 def save_parameters_to_json():
     parameters = {
         "grid_columns": grid_columns,
@@ -100,7 +99,10 @@ def save_parameters_to_json():
         "square_size": square_size,
         "COLORS": COLORS,
         "width": width,
-        "height": height
+        "height": height,
+        "var": var.get(),
+        "var2": var2.get(),
+        "var3": var3.get()
     }
     save_button.config(state=tk.DISABLED)
     try:
@@ -112,7 +114,7 @@ def save_parameters_to_json():
         log_message(f"An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
-    global grid_columns, group_size, modules, square_size, COLORS, width, height
+    global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
 
     try:
         with open(".vscode\settings.json", "r") as json_file:
@@ -124,6 +126,9 @@ def load_parameters_from_json():
             COLORS = parameters.get("COLORS", COLORS)
             width = parameters.get("width", width)
             height = parameters.get("height", height)
+            var_value = parameters.get("var", 0)
+            var2_value = parameters.get("var2", 0)
+            var3_value = parameters.get("var3", 0)
     except Exception as e:
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
 
@@ -175,34 +180,30 @@ def hide_square_tooltip(event):
         tooltip.destroy()
     tooltips.clear()
 
-# Functie om een tooltip voor een specifiek vierkant weer te geven
+def update_tooltip_position(event):
+    if tooltips:
+        x, y = event.x_root + 20, event.y_root + 20  # Voeg een offset toe voor de positie
+        for tooltip in tooltips:
+            tooltip.wm_geometry(f"+{x}+{y}")  # Verplaats de tooltip naar de nieuwe positie
+
 def show_square_tooltip_for_square(event, square):
-    x, y = event.x_root, event.y_root  # Gebruik x_root en y_root voor absolute schermcoördinaten
     square_tooltip_text = f"Switch {square-1}"
 
-    # Controleer eerst of er al een tooltip voor dit vierkant bestaat
+    # Controleer of de tooltip al bestaat voor dit vierkant
     for tooltip in tooltips:
         if tooltip.square == square:
             return  # Tooltip bestaat al voor dit vierkant
 
-    # Pas de positie aan om dichter bij de muis te zijn
-    offset_x = 10
-    offset_y = 10
-    x += offset_x
-    y += offset_y
-
-    # Toon de tooltip in een Toplevel-venster
     tw = Toplevel(root)
     tw.wm_overrideredirect(1)
-    tw.wm_geometry(f"+{x}+{y}")
-    label = Label(tw, text=square_tooltip_text, justify=LEFT,
-                  background="#ffffe0", relief=SOLID, borderwidth=1,
-                  font=("tahoma", "8", "normal"))
+    tw.configure(background="#ffffe0", relief=SOLID, borderwidth=1)
+    label = Label(tw, text=square_tooltip_text, justify=LEFT, font=("tahoma", "8", "normal"))
     label.pack(ipadx=1)
 
-    # Voeg de tooltip toe aan de lijst
     tooltips.append(tw)
     tw.square = square  # Voeg een attribuut 'square' toe aan het Toplevel-venster
+
+    update_tooltip_position(event)  # Positie instellen voor de tooltip
 
 # Functie om de tooltips voor het huidige vierkant te tonen en te verbergen voor anderen
 def update_square_tooltips(event):
@@ -215,7 +216,7 @@ def update_square_tooltips(event):
 
 # Function to be called when the button is clicked
 def button_click():
-    threading.Thread(target=send_and_receive_data).start()
+    threading.Thread(target=convert_data_from_csv).start()
 
 # Voeg een functie toe om een bestand te selecteren
 def selectFile():
@@ -223,10 +224,11 @@ def selectFile():
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
-        convert_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
+        send_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
+        converted_data = 0
     else:
         file_label.config(text="Selected file: Not yet selected")
-        convert_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
+        send_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
         if file_path:
             messagebox.showerror("Error", "Select a valid CSV file")
             log_message("Error: Select a valid CSV file")
@@ -254,16 +256,15 @@ def convert_data(num1, num2):
 
 # Functie om alle seriële poorten te openen
 def open_all_serial_ports():
-    global ser_ports, num_groups
-    ser_ports = [None] * num_groups  # Maak een lijst met None waarden voor alle modules
+    global num_groups
     for module_number in range(modules):
         if not open_ports.__contains__(get_com_port_for_module(module_number)):
             open_ports.append(get_com_port_for_module(module_number))
-            ser.append(serial.Serial(get_com_port_for_module(module_number), 138400))
+            ser.append(serial.Serial(get_com_port_for_module(module_number), baudrate=1843200))
 
 # Functie om alle seriële poorten te sluiten
 def close_all_serial_ports():
-    global ser_ports, num_groups
+    global num_groups
     for i, item in enumerate(open_ports):
         ser[i].close()
     open_ports.clear()
@@ -273,7 +274,6 @@ def close_all_serial_ports():
 def send_and_receive_data():
     try:
         global group_size, updateList, colorList, ser_ports, converted_data_list, module_list
-        button.config(state=tk.DISABLED)
         start_time = time.time()  # Start the timer
         open_all_serial_ports()
 
@@ -286,66 +286,63 @@ def send_and_receive_data():
         label1.config(text=f"Time elapsed: {elapsed_time}")
         log_message(f"Time elapsed: {elapsed_time}")
         close_all_serial_ports()
-        update_square_colors()
-        button.config(state=tk.NORMAL)
+        if var2.get() == 1:
+            update_square_colors()
     except IndexError:
         messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
         log_message(f"Error: COM Port for module {moduleNumber} already used")
-        button.config(state=tk.NORMAL)
     except Exception as e:
         messagebox.showerror("Error", f"Error: {str(e)}")
         log_message(f"Error: {str(e)}")
-        button.config(state=tk.NORMAL)
         ser.clear()
         open_ports.clear()
-#
+
 # Lijst om geconverteerde gegevens op te slaan
 converted_data_list = []
 module_list = []
+
+converted_data = 0
 # Functie om gegevens te converteren vanuit een CSV-bestand
 def convert_data_from_csv():
-    try:
-        global converted_data_list, updateList, colorList, group_size
-        updateList.clear()
-        colorList.clear()
-        converted_data_list.clear()
-        module_list.clear()
-        with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=';')
-            button_send_manual.config(state=tk.DISABLED)
-            cancel_button.config(state=tk.NORMAL)
-            for row in csv_reader:
-                if len(row) >= 2:
-                    num1 = int(row[0])
-                    num2 = int(row[1])
-                    if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
-                        updateList.append(num1)
-                        colorList.append(num2)
-                        converted_data = convert_data(num1, num2)
-                        converted_data_list.append(converted_data)
-                        moduleNumber = int(num1/group_size)
-                        module_list.append(moduleNumber)
-                    button.config(state=tk.NORMAL)
-                    convert_button.config(state=tk.DISABLED)
-                else:
-                    messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
-                    log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
-                    return                        
-    except FileNotFoundError:
-        messagebox.showerror("Error", "The selected file doesn't exist.")
-        log_message("Error: The selected file doesn't exist.")
-    except Exception as e:
-        messagebox.showerror("Error", f"Error: {str(e)}")
-        log_message(f"Error: Error: {str(e)}")
-
-def cancel():
-    global updateList, colorList
-    updateList.clear()
-    colorList.clear()
-    button.config(state=tk.DISABLED)
-    button_send_manual.config(state=tk.NORMAL)
-    cancel_button.config(state=tk.DISABLED)
-    convert_button.config(state=tk.NORMAL)
+    global converted_data
+    if converted_data == 0:
+        try:
+            global converted_data_list, updateList, colorList, group_size
+            converted_data_list.clear()
+            module_list.clear()
+            with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=';')
+                for row in csv_reader:
+                    if len(row) >= 2:
+                        num1 = int(row[0])
+                        num2 = int(row[1])
+                        if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
+                            if num1 in updateList:
+                                # Vind de positie van num1 in updateList
+                                index = updateList.index(num1)
+                                # Overschrijf num2 op dezelfde positie in colorList
+                                colorList[index] = num2
+                            else:
+                                updateList.append(num1)
+                                colorList.append(num2)
+                            converted_data = convert_data(num1, num2)
+                            converted_data_list.append(converted_data)
+                            moduleNumber = int(num1/group_size)
+                            module_list.append(moduleNumber)
+                    else:
+                        messagebox.showerror("Error", f"Incorrect input in CSV file on line {csv_reader.line_num}")
+                        log_message(f"Error: Incorrect input in CSV file on line {csv_reader.line_num}")
+                        return
+                converted_data = 1
+                send_and_receive_data()                        
+        except FileNotFoundError:
+            messagebox.showerror("Error", "The selected file doesn't exist.")
+            log_message("Error: The selected file doesn't exist.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {str(e)}")
+            log_message(f"Error: Error: {str(e)}")
+    elif converted_data == 1:
+        send_and_receive_data()
 
 # Function to send manually entered data
 def send_manual_data():
@@ -362,8 +359,14 @@ def send_manual_data():
 
             if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
                 ser = open_serial_port_for_switch(switch_num)
-                updateList.append(switch_num)
-                colorList.append(signal_num)
+                if switch_num in updateList:
+                    # Vind de positie van num1 in updateList
+                    index = updateList.index(switch_num)
+                    # Overschrijf num2 op dezelfde positie in colorList
+                    colorList[index] = signal_num
+                else:
+                    updateList.append(switch_num)
+                    colorList.append(signal_num)
                 # Stuur de gecombineerde binaire gegevens naar de seriële poort
                 ser.write(convert_data(switch_num, signal_num))
                 ser.close()
@@ -371,7 +374,8 @@ def send_manual_data():
                 elapsed_time = end_time - start_time
                 label1.config(text=f"Time elapsed: {elapsed_time}")
                 log_message(f"Time elapsed: {elapsed_time}")
-                update_square_colors()
+                if var2.get() == 1:
+                    update_square_colors()
             else:
                 messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
@@ -420,6 +424,65 @@ root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 p
 root.configure(bg="white")
 
 port_selection = StringVar(root)
+
+var3 = tk.IntVar(value=0)
+var3.set(var3_value)  # Set the value of the checkbox
+
+# Event-binding om de tooltips mee te laten bewegen met de muis
+root.bind("<Motion>", update_tooltip_position)
+
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip = None
+        if var3.get() == 1:
+            self.show_tooltip = True  # Toont de tooltips standaard
+        else:
+            self.show_tooltip = False
+
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
+        self.widget.bind("<Motion>", self.on_motion)
+
+    def toggle_tooltip(self):
+        self.show_tooltip = not self.show_tooltip
+        if not self.show_tooltip and self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def show_tooltip_popup(self, event):
+        if self.show_tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip = tk.Toplevel(self.widget)
+            self.tooltip.wm_overrideredirect(True)
+            self.tooltip.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
+            label.pack()
+
+    def hide_tooltip_popup(self):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def on_enter(self, event):
+        self.show_tooltip_popup(event)
+
+    def on_leave(self, event):
+        self.hide_tooltip_popup()
+
+    def on_motion(self, event):
+        if self.tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip.geometry(f"+{x}+{y}")
+
+tooltips2 = []  # Maak een lijst om de tooltips op te slaan
+
+def toggle_tooltips():
+    for tooltip in tooltips2:
+        tooltip.toggle_tooltip()
 
 # Create A Main frame
 main_frame = Frame(root)
@@ -525,7 +588,7 @@ color_boxes = []
 color_frame = tk.Frame(squares_frame, bg="white")
 color_frame.pack(side="right")
 
-color_labels = ["Signaal 1", "Signaal 2", "Signaal 3", "Signaal 4"]
+color_labels = ["Signal 0", "Signal 1", "Signal 2", "Signal 3"]
 
 for i, (color, label) in enumerate(zip(COLORS, color_labels)):
     signal_frame = tk.Frame(color_frame, bg="white")
@@ -533,6 +596,8 @@ for i, (color, label) in enumerate(zip(COLORS, color_labels)):
 
     color_box = tk.Canvas(signal_frame, width=30, height=30, bg=color)
     color_box.pack(side="left")  # Plaats het kleurvak links in het frame
+    tooltip1 = Tooltip(color_box, "Click to change color.")
+    tooltips2.append(tooltip1)
     color_box.bind("<Button-1>", lambda event, signal=i: change_signal_color(signal))
     color_boxes.append(color_box)
 
@@ -567,6 +632,8 @@ file_frame.pack(pady=(10,0))
 # Create file selection button
 button = tk.Button(file_frame, text="Select File", command=selectFile)
 button.pack(side="left", padx=(10,0))
+tooltip4 = Tooltip(button, "Select a CSV file.")
+tooltips2.append(tooltip4)
 
 # Voeg een label toe om de bestandsnaam weer te geven
 file_label = tk.Label(file_frame, text="Selected file: Not yet selected", bg="white")
@@ -575,18 +642,9 @@ file_label.pack(side="left")
 buttons_frame = tk.Frame(left_frame, bg="white")
 buttons_frame.pack(pady=(10,0))
 
-convert_button = tk.Button(buttons_frame, text="Convert Data", command=convert_data_from_csv)
-convert_button.config(state=tk.DISABLED)
-convert_button.pack(side="left", padx=10)
-
-# Create a button
-button = tk.Button(buttons_frame, text="Send!", command=button_click)
-button.config(state=tk.DISABLED)  # Deactiveer de knop
-button.pack(side="left")
-
-cancel_button = tk.Button(left_frame, text="Cancel", command=cancel)
-cancel_button.config(state=tk.DISABLED)  # Deactiveer de knop
-cancel_button.pack(pady=(10,0))
+send_button = tk.Button(buttons_frame, text="Send Data", command=button_click)
+send_button.config(state=tk.DISABLED)
+send_button.pack(side="left", padx=10)
 
 # Create a label
 label1 = tk.Label(left_frame, text="Time elapsed: 0", bg="white")
@@ -639,6 +697,8 @@ button_send_manual.pack(side="left")
 # Create a button to send manual data
 reset_all_button = tk.Button(button_frame, text="Reset All", command=reset_all)
 reset_all_button.pack(side="left", padx=20)
+tooltip5 = Tooltip(reset_all_button, "This will reset all switches to signal 0.")
+tooltips2.append(tooltip5)
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
 top_left_frame3 = tk.Frame(left_frame, bg="RoyalBlue4")
@@ -690,6 +750,24 @@ generate_group_dropdown_values()  # Genereer de waarden voor de uitklapbare lijs
 group_dropdown.bind("<<ComboboxSelected>>", on_group_selection_change)  # Voer de functie uit wanneer een nieuwe groep is geselecteerd
 group_dropdown.pack(side="left", anchor="nw")
 
+update_colors_button = tk.Button(number_frame, text="Update colors", command=update_square_colors)
+update_colors_button.pack(side="left", padx=(50,20))
+
+def toggle_button():
+    if update_colors_button["state"] == NORMAL:
+        update_colors_button.configure(state=DISABLED)
+    else:
+        update_colors_button.configure(state=NORMAL)
+
+var2 = tk.IntVar(value=0)
+var2.set(var2_value)  # Set the value of the checkbox
+auto_update = tk.Checkbutton(number_frame, text="Update colors automatically", variable=var2, bg="white", command=toggle_button)
+auto_update.pack(side="left")
+
+tooltip2 = Tooltip(auto_update, "Activating this option might introduce a delay when sending files.")
+tooltips2.append(tooltip2)
+
+
 # Standaard weergave van de huidige groep
 show_current_group()
 
@@ -725,6 +803,9 @@ label_square_size.pack(side="left")
 entry_square_size = tk.Entry(size_frame)
 entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
 entry_square_size.pack(side="left")
+
+tooltip_checkbox = tk.Checkbutton(left_frame, variable=var3, text="Show Tooltips", command=toggle_tooltips, bg="white")
+tooltip_checkbox.pack(padx=(0,110))
 
 def rearrange_squares():
     # Herverdeel de vierkanten op het nieuwe raster
@@ -839,9 +920,12 @@ def reset_log():
     log_text.delete("1.0", "end")
 
 var = tk.IntVar(value=0)
+var.set(var_value)  # Set the value of the checkbox
 # Maak het selectievakje en koppel het aan de variabele var
-log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
+log_data = tk.Checkbutton(right_frame, text="Log send data", variable=var, bg="white")
 log_data.pack(side="left", padx=20)
+tooltip3 = Tooltip(log_data, "Activating this option will only log the data the first time a file is send.")
+tooltips2.append(tooltip3)
 
 save_log_button = tk.Button(right_frame, text="Save Log", command=save_log)
 save_log_button.pack(side="left")
@@ -970,11 +1054,6 @@ def loadComFromJSON():
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
 
-#var2 = tk.IntVar(value=0)
-# Maak het selectievakje en koppel het aan de variabele var
-#reoccurring_COM = tk.Checkbutton(frame_button, text="Allow reoccurring COM ports", variable=var2, bg="white")
-#reoccurring_COM.pack(side="left")
-
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
@@ -982,6 +1061,7 @@ LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=load
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
-
+update_parameters()
+save_button.config(state=DISABLED)
 # Start the main loop
 root.mainloop()
