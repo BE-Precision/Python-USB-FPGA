@@ -220,12 +220,12 @@ def button_click():
 
 # Voeg een functie toe om een bestand te selecteren
 def selectFile():
-    global file_path
+    global file_path, converted_data
+    converted_data = 0
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
         send_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
-        converted_data = 0
     else:
         file_label.config(text="Selected file: Not yet selected")
         send_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
@@ -280,6 +280,14 @@ def send_and_receive_data():
         for i in range(len(converted_data_list)):
             moduleNumber = module_list[i]
             ser[moduleNumber].write(converted_data_list[i])
+            if updateList2[i] in updateList:
+                # Vind de positie van num1 in updateList
+                index = updateList.index(updateList2[i])
+                # Overschrijf num2 op dezelfde positie in colorList
+                colorList[index] = colorList2[i]
+            else:
+                updateList.append(updateList2[i])
+                colorList.append(colorList2[i])
             
         end_time = time.time()  # Stop the timer
         elapsed_time = end_time - start_time
@@ -300,6 +308,8 @@ def send_and_receive_data():
 # Lijst om geconverteerde gegevens op te slaan
 converted_data_list = []
 module_list = []
+colorList2 = []
+updateList2 = []
 
 converted_data = 0
 # Functie om gegevens te converteren vanuit een CSV-bestand
@@ -310,21 +320,18 @@ def convert_data_from_csv():
             global converted_data_list, updateList, colorList, group_size
             converted_data_list.clear()
             module_list.clear()
+            colorList2.clear()
+            updateList2.clear()
             with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=';')
                 for row in csv_reader:
                     if len(row) >= 2:
                         num1 = int(row[0])
                         num2 = int(row[1])
-                        if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS):                        
-                            if num1 in updateList:
-                                # Vind de positie van num1 in updateList
-                                index = updateList.index(num1)
-                                # Overschrijf num2 op dezelfde positie in colorList
-                                colorList[index] = num2
-                            else:
-                                updateList.append(num1)
-                                colorList.append(num2)
+                        if 0 <= num1 < grid_size and 0 <= num2 < len(COLORS): 
+                            colorList2.append(num2)
+                            updateList2.append(num1)                       
+                            
                             converted_data = convert_data(num1, num2)
                             converted_data_list.append(converted_data)
                             moduleNumber = int(num1/group_size)
