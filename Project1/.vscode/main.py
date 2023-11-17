@@ -91,56 +91,6 @@ square_size = 15  # Grootte van elk vierkantje
 width = 10
 height = 10
 
-class Tooltip:
-    def __init__(self, widget, text):
-        self.widget = widget
-        self.text = text
-        self.tooltip = None
-        self.show_tooltip = True  # Toont de tooltips standaard
-
-        self.widget.bind("<Enter>", self.on_enter)
-        self.widget.bind("<Leave>", self.on_leave)
-        self.widget.bind("<Motion>", self.on_motion)
-
-    def toggle_tooltip(self):
-        self.show_tooltip = not self.show_tooltip
-        if not self.show_tooltip and self.tooltip:
-            self.tooltip.destroy()
-            self.tooltip = None
-
-    def show_tooltip_popup(self, event):
-        if self.show_tooltip:
-            x = event.x_root + 20
-            y = event.y_root + 20
-            self.tooltip = tk.Toplevel(self.widget)
-            self.tooltip.wm_overrideredirect(True)
-            self.tooltip.wm_geometry(f"+{x}+{y}")
-            label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
-            label.pack()
-
-    def hide_tooltip_popup(self):
-        if self.tooltip:
-            self.tooltip.destroy()
-            self.tooltip = None
-
-    def on_enter(self, event):
-        self.show_tooltip_popup(event)
-
-    def on_leave(self, event):
-        self.hide_tooltip_popup()
-
-    def on_motion(self, event):
-        if self.tooltip:
-            x = event.x_root + 20
-            y = event.y_root + 20
-            self.tooltip.geometry(f"+{x}+{y}")
-
-tooltips2 = []  # Maak een lijst om de tooltips op te slaan
-
-def toggle_tooltips():
-    for tooltip in tooltips2:
-        tooltip.toggle_tooltip()
-
 def save_parameters_to_json():
     parameters = {
         "grid_columns": grid_columns,
@@ -149,7 +99,10 @@ def save_parameters_to_json():
         "square_size": square_size,
         "COLORS": COLORS,
         "width": width,
-        "height": height
+        "height": height,
+        "var": var.get(),
+        "var2": var2.get(),
+        "var3": var3.get()
     }
     save_button.config(state=tk.DISABLED)
     try:
@@ -161,7 +114,7 @@ def save_parameters_to_json():
         log_message(f"An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
-    global grid_columns, group_size, modules, square_size, COLORS, width, height
+    global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
 
     try:
         with open("Project1\.vscode\settings.json", "r") as json_file:
@@ -173,6 +126,9 @@ def load_parameters_from_json():
             COLORS = parameters.get("COLORS", COLORS)
             width = parameters.get("width", width)
             height = parameters.get("height", height)
+            var_value = parameters.get("var", 0)
+            var2_value = parameters.get("var2", 0)
+            var3_value = parameters.get("var3", 0)
     except Exception as e:
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
 
@@ -473,6 +429,62 @@ root.configure(bg="white")
 
 port_selection = StringVar(root)
 
+var3 = tk.IntVar(value=0)
+var3.set(var3_value)  # Set the value of the checkbox
+
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip = None
+        if var3.get() == 1:
+            self.show_tooltip = True  # Toont de tooltips standaard
+        else:
+            self.show_tooltip = False
+
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
+        self.widget.bind("<Motion>", self.on_motion)
+
+    def toggle_tooltip(self):
+        self.show_tooltip = not self.show_tooltip
+        if not self.show_tooltip and self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def show_tooltip_popup(self, event):
+        if self.show_tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip = tk.Toplevel(self.widget)
+            self.tooltip.wm_overrideredirect(True)
+            self.tooltip.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(self.tooltip, text=self.text, background="#FFFFDD", relief='solid', borderwidth=1)
+            label.pack()
+
+    def hide_tooltip_popup(self):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def on_enter(self, event):
+        self.show_tooltip_popup(event)
+
+    def on_leave(self, event):
+        self.hide_tooltip_popup()
+
+    def on_motion(self, event):
+        if self.tooltip:
+            x = event.x_root + 20
+            y = event.y_root + 20
+            self.tooltip.geometry(f"+{x}+{y}")
+
+tooltips2 = []  # Maak een lijst om de tooltips op te slaan
+
+def toggle_tooltips():
+    for tooltip in tooltips2:
+        tooltip.toggle_tooltip()
+
 # Create A Main frame
 main_frame = Frame(root)
 main_frame.pack(fill=BOTH, expand=1)
@@ -577,7 +589,7 @@ color_boxes = []
 color_frame = tk.Frame(squares_frame, bg="white")
 color_frame.pack(side="right")
 
-color_labels = ["Signaal 1", "Signaal 2", "Signaal 3", "Signaal 4"]
+color_labels = ["Signal 0", "Signal 1", "Signal 2", "Signal 3"]
 
 for i, (color, label) in enumerate(zip(COLORS, color_labels)):
     signal_frame = tk.Frame(color_frame, bg="white")
@@ -621,6 +633,8 @@ file_frame.pack(pady=(10,0))
 # Create file selection button
 button = tk.Button(file_frame, text="Select File", command=selectFile)
 button.pack(side="left", padx=(10,0))
+tooltip4 = Tooltip(button, "Select a CSV file.")
+tooltips2.append(tooltip4)
 
 # Voeg een label toe om de bestandsnaam weer te geven
 file_label = tk.Label(file_frame, text="Selected file: Not yet selected", bg="white")
@@ -684,6 +698,8 @@ button_send_manual.pack(side="left")
 # Create a button to send manual data
 reset_all_button = tk.Button(button_frame, text="Reset All", command=reset_all)
 reset_all_button.pack(side="left", padx=20)
+tooltip5 = Tooltip(reset_all_button, "This will reset all switches to signal 0.")
+tooltips2.append(tooltip5)
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
 top_left_frame3 = tk.Frame(left_frame, bg="RoyalBlue4")
@@ -743,7 +759,9 @@ def toggle_button():
         update_colors_button.configure(state=DISABLED)
     else:
         update_colors_button.configure(state=NORMAL)
+
 var2 = tk.IntVar(value=0)
+var2.set(var2_value)  # Set the value of the checkbox
 auto_update = tk.Checkbutton(number_frame, text="Update colors automatically", variable=var2, bg="white", command=toggle_button)
 auto_update.pack(side="left")
 
@@ -787,7 +805,7 @@ entry_square_size = tk.Entry(size_frame)
 entry_square_size.insert(0, square_size)  # Stel de standaardwaarde in
 entry_square_size.pack(side="left")
 
-tooltip_checkbox = tk.Checkbutton(left_frame, text="Show Tooltips", command=toggle_tooltips, bg="white")
+tooltip_checkbox = tk.Checkbutton(left_frame, variable=var3, text="Show Tooltips", command=toggle_tooltips, bg="white")
 tooltip_checkbox.pack(padx=(0,110))
 
 def rearrange_squares():
@@ -903,9 +921,12 @@ def reset_log():
     log_text.delete("1.0", "end")
 
 var = tk.IntVar(value=0)
+var.set(var_value)  # Set the value of the checkbox
 # Maak het selectievakje en koppel het aan de variabele var
-log_data = tk.Checkbutton(right_frame, text="Log send data (very slow)", variable=var, bg="white")
+log_data = tk.Checkbutton(right_frame, text="Log send data", variable=var, bg="white")
 log_data.pack(side="left", padx=20)
+tooltip3 = Tooltip(log_data, "Activating this option will only log the data the first time a file is send.")
+tooltips2.append(tooltip3)
 
 save_log_button = tk.Button(right_frame, text="Save Log", command=save_log)
 save_log_button.pack(side="left")
