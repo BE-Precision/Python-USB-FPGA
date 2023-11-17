@@ -1,0 +1,202 @@
+case (schakelaar_dec)
+	0: begin
+		iopin[0] =  M_signalSel_q[0];
+		iopin[1] =  M_signalSel_q[1];
+		end
+	1: begin
+		iopin[2] =  M_signalSel_q[0];
+		iopin[3] =  M_signalSel_q[1];
+		end
+	2: begin
+		iopin[4] =  M_signalSel_q[0];
+		iopin[5] =  M_signalSel_q[1];
+		end
+	3: begin
+		iopin[6] =  M_signalSel_q[0];
+		iopin[7] =  M_signalSel_q[1];
+		end
+	4: begin
+		iopin[8] =  M_signalSel_q[0];
+		iopin[9] =  M_signalSel_q[1];
+		end
+	5: begin
+		iopin[10] =  M_signalSel_q[0];
+		iopin[11] =  M_signalSel_q[1];
+		end
+	6: begin
+		iopin[12] =  M_signalSel_q[0];
+		iopin[13] =  M_signalSel_q[1];
+		end
+	7: begin
+		iopin[14] =  M_signalSel_q[0];
+		iopin[15] =  M_signalSel_q[1];
+		end
+	8: begin
+		iopin[16] =  M_signalSel_q[0];
+		iopin[17] =  M_signalSel_q[1];
+		end
+	9: begin
+		iopin[18] =  M_signalSel_q[0];
+		iopin[19] =  M_signalSel_q[1];
+		end
+	10: begin
+		iopin[20] =  M_signalSel_q[0];
+		iopin[21] =  M_signalSel_q[1];
+		end
+	11: begin
+		iopin[22] =  M_signalSel_q[0];
+		iopin[23] =  M_signalSel_q[1];
+		end
+	12: begin
+		iopin[24] =  M_signalSel_q[0];
+		iopin[25] =  M_signalSel_q[1];
+		end
+	13: begin
+		iopin[26] =  M_signalSel_q[0];
+		iopin[27] =  M_signalSel_q[1];
+		end
+	14: begin
+		iopin[28] =  M_signalSel_q[0];
+		iopin[29] =  M_signalSel_q[1];
+		end
+	15: begin
+		iopin[30] =  M_signalSel_q[0];
+		iopin[31] =  M_signalSel_q[1];
+		end
+	16: begin
+		iopin[32] =  M_signalSel_q[0];
+		iopin[33] =  M_signalSel_q[1];
+		end
+	17: begin
+		iopin[34] =  M_signalSel_q[0];
+		iopin[35] =  M_signalSel_q[1];
+		end
+	18: begin
+		iopin[36] =  M_signalSel_q[0];
+		iopin[37] =  M_signalSel_q[1];
+		end
+	19: begin
+		iopin[38] =  M_signalSel_q[0];
+		iopin[39] =  M_signalSel_q[1];
+		end
+	20: begin
+		iopin[40] =  M_signalSel_q[0];
+		iopin[41] =  M_signalSel_q[1];
+		end
+	21: begin
+		iopin[42] =  M_signalSel_q[0];
+		iopin[43] =  M_signalSel_q[1];
+		end
+	22: begin
+		iopin[44] =  M_signalSel_q[0];
+		iopin[45] =  M_signalSel_q[1];
+		end
+	23: begin
+		iopin[46] =  M_signalSel_q[0];
+		iopin[47] =  M_signalSel_q[1];
+		end
+	24: begin
+		iopin[48] =  M_signalSel_q[0];
+		iopin[49] =  M_signalSel_q[1];
+		end
+	25: begin
+		iopin[50] =  M_signalSel_q[0];
+		iopin[51] =  M_signalSel_q[1];
+		end
+	26: begin
+		iopin[52] =  M_signalSel_q[0];
+		iopin[53] =  M_signalSel_q[1];
+		end
+	27: begin
+		iopin[54] =  M_signalSel_q[0];
+		iopin[55] =  M_signalSel_q[1];
+		end
+	28: begin
+		iopin[56] =  M_signalSel_q[0];
+		iopin[57] =  M_signalSel_q[1];
+		end
+	29: begin
+		iopin[58] =  M_signalSel_q[0];
+		iopin[59] =  M_signalSel_q[1];
+		end
+	30: begin
+		iopin[60] =  M_signalSel_q[0];
+		iopin[61] =  M_signalSel_q[1];
+		end
+	31: begin
+		iopin[62] =  M_signalSel_q[0];
+		iopin[63] =  M_signalSel_q[1];
+		end
+	32: begin
+		iopin[64] =  M_signalSel_q[0];
+		iopin[65] =  M_signalSel_q[1];
+		end
+	33: begin
+		iopin[66] =  M_signalSel_q[0];
+		iopin[67] =  M_signalSel_q[1];
+		end
+	34: begin
+		iopin[68] =  M_signalSel_q[0];
+		iopin[69] =  M_signalSel_q[1];
+		end
+	35: begin
+		iopin[70] =  M_signalSel_q[0];
+		iopin[71] =  M_signalSel_q[1];
+		end
+	36: begin
+		iopin[72] =  M_signalSel_q[0];
+		iopin[73] =  M_signalSel_q[1];
+		end
+	37: begin
+		iopin[74] =  M_signalSel_q[0];
+		iopin[75] =  M_signalSel_q[1];
+		end
+	38: begin
+		iopin[76] =  M_signalSel_q[0];
+		iopin[77] =  M_signalSel_q[1];
+		end
+	39: begin
+		iopin[78] =  M_signalSel_q[0];
+		iopin[79] =  M_signalSel_q[1];
+		end
+	40: begin
+		iopin[80] =  M_signalSel_q[0];
+		iopin[81] =  M_signalSel_q[1];
+		end
+	41: begin
+		iopin[82] =  M_signalSel_q[0];
+		iopin[83] =  M_signalSel_q[1];
+		end
+	42: begin
+		iopin[84] =  M_signalSel_q[0];
+		iopin[85] =  M_signalSel_q[1];
+		end
+	43: begin
+		iopin[86] =  M_signalSel_q[0];
+		iopin[87] =  M_signalSel_q[1];
+		end
+	44: begin
+		iopin[88] =  M_signalSel_q[0];
+		iopin[89] =  M_signalSel_q[1];
+		end
+	45: begin
+		iopin[90] =  M_signalSel_q[0];
+		iopin[91] =  M_signalSel_q[1];
+		end
+	46: begin
+		iopin[92] =  M_signalSel_q[0];
+		iopin[93] =  M_signalSel_q[1];
+		end
+	47: begin
+		iopin[94] =  M_signalSel_q[0];
+		iopin[95] =  M_signalSel_q[1];
+		end
+	48: begin
+		iopin[96] =  M_signalSel_q[0];
+		iopin[97] =  M_signalSel_q[1];
+		end
+	49: begin
+		iopin[98] =  M_signalSel_q[0];
+		iopin[99] =  M_signalSel_q[1];
+		end
+	endcase

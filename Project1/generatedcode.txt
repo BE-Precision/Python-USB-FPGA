@@ -1,0 +1,300 @@
+else if (schakelaar.q == 0){
+	if (signalSel.q == 0){iopin[0] = 0; iopin[1] = 0;}
+	if (signalSel.q == 1){iopin[0] = 0; iopin[1] = 1;}
+	if (signalSel.q == 2){iopin[0] = 1; iopin[1] = 0;}
+	if (signalSel.q == 3){iopin[0] = 1; iopin[1] = 1;}
+}
+else if (schakelaar.q == 1){
+	if (signalSel.q == 0){iopin[2] = 0; iopin[3] = 0;}
+	if (signalSel.q == 1){iopin[2] = 0; iopin[3] = 1;}
+	if (signalSel.q == 2){iopin[2] = 1; iopin[3] = 0;}
+	if (signalSel.q == 3){iopin[2] = 1; iopin[3] = 1;}
+}
+else if (schakelaar.q == 2){
+	if (signalSel.q == 0){iopin[4] = 0; iopin[5] = 0;}
+	if (signalSel.q == 1){iopin[4] = 0; iopin[5] = 1;}
+	if (signalSel.q == 2){iopin[4] = 1; iopin[5] = 0;}
+	if (signalSel.q == 3){iopin[4] = 1; iopin[5] = 1;}
+}
+else if (schakelaar.q == 3){
+	if (signalSel.q == 0){iopin[6] = 0; iopin[7] = 0;}
+	if (signalSel.q == 1){iopin[6] = 0; iopin[7] = 1;}
+	if (signalSel.q == 2){iopin[6] = 1; iopin[7] = 0;}
+	if (signalSel.q == 3){iopin[6] = 1; iopin[7] = 1;}
+}
+else if (schakelaar.q == 4){
+	if (signalSel.q == 0){iopin[8] = 0; iopin[9] = 0;}
+	if (signalSel.q == 1){iopin[8] = 0; iopin[9] = 1;}
+	if (signalSel.q == 2){iopin[8] = 1; iopin[9] = 0;}
+	if (signalSel.q == 3){iopin[8] = 1; iopin[9] = 1;}
+}
+else if (schakelaar.q == 5){
+	if (signalSel.q == 0){iopin[10] = 0; iopin[11] = 0;}
+	if (signalSel.q == 1){iopin[10] = 0; iopin[11] = 1;}
+	if (signalSel.q == 2){iopin[10] = 1; iopin[11] = 0;}
+	if (signalSel.q == 3){iopin[10] = 1; iopin[11] = 1;}
+}
+else if (schakelaar.q == 6){
+	if (signalSel.q == 0){iopin[12] = 0; iopin[13] = 0;}
+	if (signalSel.q == 1){iopin[12] = 0; iopin[13] = 1;}
+	if (signalSel.q == 2){iopin[12] = 1; iopin[13] = 0;}
+	if (signalSel.q == 3){iopin[12] = 1; iopin[13] = 1;}
+}
+else if (schakelaar.q == 7){
+	if (signalSel.q == 0){iopin[14] = 0; iopin[15] = 0;}
+	if (signalSel.q == 1){iopin[14] = 0; iopin[15] = 1;}
+	if (signalSel.q == 2){iopin[14] = 1; iopin[15] = 0;}
+	if (signalSel.q == 3){iopin[14] = 1; iopin[15] = 1;}
+}
+else if (schakelaar.q == 8){
+	if (signalSel.q == 0){iopin[16] = 0; iopin[17] = 0;}
+	if (signalSel.q == 1){iopin[16] = 0; iopin[17] = 1;}
+	if (signalSel.q == 2){iopin[16] = 1; iopin[17] = 0;}
+	if (signalSel.q == 3){iopin[16] = 1; iopin[17] = 1;}
+}
+else if (schakelaar.q == 9){
+	if (signalSel.q == 0){iopin[18] = 0; iopin[19] = 0;}
+	if (signalSel.q == 1){iopin[18] = 0; iopin[19] = 1;}
+	if (signalSel.q == 2){iopin[18] = 1; iopin[19] = 0;}
+	if (signalSel.q == 3){iopin[18] = 1; iopin[19] = 1;}
+}
+else if (schakelaar.q == 10){
+	if (signalSel.q == 0){iopin[20] = 0; iopin[21] = 0;}
+	if (signalSel.q == 1){iopin[20] = 0; iopin[21] = 1;}
+	if (signalSel.q == 2){iopin[20] = 1; iopin[21] = 0;}
+	if (signalSel.q == 3){iopin[20] = 1; iopin[21] = 1;}
+}
+else if (schakelaar.q == 11){
+	if (signalSel.q == 0){iopin[22] = 0; iopin[23] = 0;}
+	if (signalSel.q == 1){iopin[22] = 0; iopin[23] = 1;}
+	if (signalSel.q == 2){iopin[22] = 1; iopin[23] = 0;}
+	if (signalSel.q == 3){iopin[22] = 1; iopin[23] = 1;}
+}
+else if (schakelaar.q == 12){
+	if (signalSel.q == 0){iopin[24] = 0; iopin[25] = 0;}
+	if (signalSel.q == 1){iopin[24] = 0; iopin[25] = 1;}
+	if (signalSel.q == 2){iopin[24] = 1; iopin[25] = 0;}
+	if (signalSel.q == 3){iopin[24] = 1; iopin[25] = 1;}
+}
+else if (schakelaar.q == 13){
+	if (signalSel.q == 0){iopin[26] = 0; iopin[27] = 0;}
+	if (signalSel.q == 1){iopin[26] = 0; iopin[27] = 1;}
+	if (signalSel.q == 2){iopin[26] = 1; iopin[27] = 0;}
+	if (signalSel.q == 3){iopin[26] = 1; iopin[27] = 1;}
+}
+else if (schakelaar.q == 14){
+	if (signalSel.q == 0){iopin[28] = 0; iopin[29] = 0;}
+	if (signalSel.q == 1){iopin[28] = 0; iopin[29] = 1;}
+	if (signalSel.q == 2){iopin[28] = 1; iopin[29] = 0;}
+	if (signalSel.q == 3){iopin[28] = 1; iopin[29] = 1;}
+}
+else if (schakelaar.q == 15){
+	if (signalSel.q == 0){iopin[30] = 0; iopin[31] = 0;}
+	if (signalSel.q == 1){iopin[30] = 0; iopin[31] = 1;}
+	if (signalSel.q == 2){iopin[30] = 1; iopin[31] = 0;}
+	if (signalSel.q == 3){iopin[30] = 1; iopin[31] = 1;}
+}
+else if (schakelaar.q == 16){
+	if (signalSel.q == 0){iopin[32] = 0; iopin[33] = 0;}
+	if (signalSel.q == 1){iopin[32] = 0; iopin[33] = 1;}
+	if (signalSel.q == 2){iopin[32] = 1; iopin[33] = 0;}
+	if (signalSel.q == 3){iopin[32] = 1; iopin[33] = 1;}
+}
+else if (schakelaar.q == 17){
+	if (signalSel.q == 0){iopin[34] = 0; iopin[35] = 0;}
+	if (signalSel.q == 1){iopin[34] = 0; iopin[35] = 1;}
+	if (signalSel.q == 2){iopin[34] = 1; iopin[35] = 0;}
+	if (signalSel.q == 3){iopin[34] = 1; iopin[35] = 1;}
+}
+else if (schakelaar.q == 18){
+	if (signalSel.q == 0){iopin[36] = 0; iopin[37] = 0;}
+	if (signalSel.q == 1){iopin[36] = 0; iopin[37] = 1;}
+	if (signalSel.q == 2){iopin[36] = 1; iopin[37] = 0;}
+	if (signalSel.q == 3){iopin[36] = 1; iopin[37] = 1;}
+}
+else if (schakelaar.q == 19){
+	if (signalSel.q == 0){iopin[38] = 0; iopin[39] = 0;}
+	if (signalSel.q == 1){iopin[38] = 0; iopin[39] = 1;}
+	if (signalSel.q == 2){iopin[38] = 1; iopin[39] = 0;}
+	if (signalSel.q == 3){iopin[38] = 1; iopin[39] = 1;}
+}
+else if (schakelaar.q == 20){
+	if (signalSel.q == 0){iopin[40] = 0; iopin[41] = 0;}
+	if (signalSel.q == 1){iopin[40] = 0; iopin[41] = 1;}
+	if (signalSel.q == 2){iopin[40] = 1; iopin[41] = 0;}
+	if (signalSel.q == 3){iopin[40] = 1; iopin[41] = 1;}
+}
+else if (schakelaar.q == 21){
+	if (signalSel.q == 0){iopin[42] = 0; iopin[43] = 0;}
+	if (signalSel.q == 1){iopin[42] = 0; iopin[43] = 1;}
+	if (signalSel.q == 2){iopin[42] = 1; iopin[43] = 0;}
+	if (signalSel.q == 3){iopin[42] = 1; iopin[43] = 1;}
+}
+else if (schakelaar.q == 22){
+	if (signalSel.q == 0){iopin[44] = 0; iopin[45] = 0;}
+	if (signalSel.q == 1){iopin[44] = 0; iopin[45] = 1;}
+	if (signalSel.q == 2){iopin[44] = 1; iopin[45] = 0;}
+	if (signalSel.q == 3){iopin[44] = 1; iopin[45] = 1;}
+}
+else if (schakelaar.q == 23){
+	if (signalSel.q == 0){iopin[46] = 0; iopin[47] = 0;}
+	if (signalSel.q == 1){iopin[46] = 0; iopin[47] = 1;}
+	if (signalSel.q == 2){iopin[46] = 1; iopin[47] = 0;}
+	if (signalSel.q == 3){iopin[46] = 1; iopin[47] = 1;}
+}
+else if (schakelaar.q == 24){
+	if (signalSel.q == 0){iopin[48] = 0; iopin[49] = 0;}
+	if (signalSel.q == 1){iopin[48] = 0; iopin[49] = 1;}
+	if (signalSel.q == 2){iopin[48] = 1; iopin[49] = 0;}
+	if (signalSel.q == 3){iopin[48] = 1; iopin[49] = 1;}
+}
+else if (schakelaar.q == 25){
+	if (signalSel.q == 0){iopin[50] = 0; iopin[51] = 0;}
+	if (signalSel.q == 1){iopin[50] = 0; iopin[51] = 1;}
+	if (signalSel.q == 2){iopin[50] = 1; iopin[51] = 0;}
+	if (signalSel.q == 3){iopin[50] = 1; iopin[51] = 1;}
+}
+else if (schakelaar.q == 26){
+	if (signalSel.q == 0){iopin[52] = 0; iopin[53] = 0;}
+	if (signalSel.q == 1){iopin[52] = 0; iopin[53] = 1;}
+	if (signalSel.q == 2){iopin[52] = 1; iopin[53] = 0;}
+	if (signalSel.q == 3){iopin[52] = 1; iopin[53] = 1;}
+}
+else if (schakelaar.q == 27){
+	if (signalSel.q == 0){iopin[54] = 0; iopin[55] = 0;}
+	if (signalSel.q == 1){iopin[54] = 0; iopin[55] = 1;}
+	if (signalSel.q == 2){iopin[54] = 1; iopin[55] = 0;}
+	if (signalSel.q == 3){iopin[54] = 1; iopin[55] = 1;}
+}
+else if (schakelaar.q == 28){
+	if (signalSel.q == 0){iopin[56] = 0; iopin[57] = 0;}
+	if (signalSel.q == 1){iopin[56] = 0; iopin[57] = 1;}
+	if (signalSel.q == 2){iopin[56] = 1; iopin[57] = 0;}
+	if (signalSel.q == 3){iopin[56] = 1; iopin[57] = 1;}
+}
+else if (schakelaar.q == 29){
+	if (signalSel.q == 0){iopin[58] = 0; iopin[59] = 0;}
+	if (signalSel.q == 1){iopin[58] = 0; iopin[59] = 1;}
+	if (signalSel.q == 2){iopin[58] = 1; iopin[59] = 0;}
+	if (signalSel.q == 3){iopin[58] = 1; iopin[59] = 1;}
+}
+else if (schakelaar.q == 30){
+	if (signalSel.q == 0){iopin[60] = 0; iopin[61] = 0;}
+	if (signalSel.q == 1){iopin[60] = 0; iopin[61] = 1;}
+	if (signalSel.q == 2){iopin[60] = 1; iopin[61] = 0;}
+	if (signalSel.q == 3){iopin[60] = 1; iopin[61] = 1;}
+}
+else if (schakelaar.q == 31){
+	if (signalSel.q == 0){iopin[62] = 0; iopin[63] = 0;}
+	if (signalSel.q == 1){iopin[62] = 0; iopin[63] = 1;}
+	if (signalSel.q == 2){iopin[62] = 1; iopin[63] = 0;}
+	if (signalSel.q == 3){iopin[62] = 1; iopin[63] = 1;}
+}
+else if (schakelaar.q == 32){
+	if (signalSel.q == 0){iopin[64] = 0; iopin[65] = 0;}
+	if (signalSel.q == 1){iopin[64] = 0; iopin[65] = 1;}
+	if (signalSel.q == 2){iopin[64] = 1; iopin[65] = 0;}
+	if (signalSel.q == 3){iopin[64] = 1; iopin[65] = 1;}
+}
+else if (schakelaar.q == 33){
+	if (signalSel.q == 0){iopin[66] = 0; iopin[67] = 0;}
+	if (signalSel.q == 1){iopin[66] = 0; iopin[67] = 1;}
+	if (signalSel.q == 2){iopin[66] = 1; iopin[67] = 0;}
+	if (signalSel.q == 3){iopin[66] = 1; iopin[67] = 1;}
+}
+else if (schakelaar.q == 34){
+	if (signalSel.q == 0){iopin[68] = 0; iopin[69] = 0;}
+	if (signalSel.q == 1){iopin[68] = 0; iopin[69] = 1;}
+	if (signalSel.q == 2){iopin[68] = 1; iopin[69] = 0;}
+	if (signalSel.q == 3){iopin[68] = 1; iopin[69] = 1;}
+}
+else if (schakelaar.q == 35){
+	if (signalSel.q == 0){iopin[70] = 0; iopin[71] = 0;}
+	if (signalSel.q == 1){iopin[70] = 0; iopin[71] = 1;}
+	if (signalSel.q == 2){iopin[70] = 1; iopin[71] = 0;}
+	if (signalSel.q == 3){iopin[70] = 1; iopin[71] = 1;}
+}
+else if (schakelaar.q == 36){
+	if (signalSel.q == 0){iopin[72] = 0; iopin[73] = 0;}
+	if (signalSel.q == 1){iopin[72] = 0; iopin[73] = 1;}
+	if (signalSel.q == 2){iopin[72] = 1; iopin[73] = 0;}
+	if (signalSel.q == 3){iopin[72] = 1; iopin[73] = 1;}
+}
+else if (schakelaar.q == 37){
+	if (signalSel.q == 0){iopin[74] = 0; iopin[75] = 0;}
+	if (signalSel.q == 1){iopin[74] = 0; iopin[75] = 1;}
+	if (signalSel.q == 2){iopin[74] = 1; iopin[75] = 0;}
+	if (signalSel.q == 3){iopin[74] = 1; iopin[75] = 1;}
+}
+else if (schakelaar.q == 38){
+	if (signalSel.q == 0){iopin[76] = 0; iopin[77] = 0;}
+	if (signalSel.q == 1){iopin[76] = 0; iopin[77] = 1;}
+	if (signalSel.q == 2){iopin[76] = 1; iopin[77] = 0;}
+	if (signalSel.q == 3){iopin[76] = 1; iopin[77] = 1;}
+}
+else if (schakelaar.q == 39){
+	if (signalSel.q == 0){iopin[78] = 0; iopin[79] = 0;}
+	if (signalSel.q == 1){iopin[78] = 0; iopin[79] = 1;}
+	if (signalSel.q == 2){iopin[78] = 1; iopin[79] = 0;}
+	if (signalSel.q == 3){iopin[78] = 1; iopin[79] = 1;}
+}
+else if (schakelaar.q == 40){
+	if (signalSel.q == 0){iopin[80] = 0; iopin[81] = 0;}
+	if (signalSel.q == 1){iopin[80] = 0; iopin[81] = 1;}
+	if (signalSel.q == 2){iopin[80] = 1; iopin[81] = 0;}
+	if (signalSel.q == 3){iopin[80] = 1; iopin[81] = 1;}
+}
+else if (schakelaar.q == 41){
+	if (signalSel.q == 0){iopin[82] = 0; iopin[83] = 0;}
+	if (signalSel.q == 1){iopin[82] = 0; iopin[83] = 1;}
+	if (signalSel.q == 2){iopin[82] = 1; iopin[83] = 0;}
+	if (signalSel.q == 3){iopin[82] = 1; iopin[83] = 1;}
+}
+else if (schakelaar.q == 42){
+	if (signalSel.q == 0){iopin[84] = 0; iopin[85] = 0;}
+	if (signalSel.q == 1){iopin[84] = 0; iopin[85] = 1;}
+	if (signalSel.q == 2){iopin[84] = 1; iopin[85] = 0;}
+	if (signalSel.q == 3){iopin[84] = 1; iopin[85] = 1;}
+}
+else if (schakelaar.q == 43){
+	if (signalSel.q == 0){iopin[86] = 0; iopin[87] = 0;}
+	if (signalSel.q == 1){iopin[86] = 0; iopin[87] = 1;}
+	if (signalSel.q == 2){iopin[86] = 1; iopin[87] = 0;}
+	if (signalSel.q == 3){iopin[86] = 1; iopin[87] = 1;}
+}
+else if (schakelaar.q == 44){
+	if (signalSel.q == 0){iopin[88] = 0; iopin[89] = 0;}
+	if (signalSel.q == 1){iopin[88] = 0; iopin[89] = 1;}
+	if (signalSel.q == 2){iopin[88] = 1; iopin[89] = 0;}
+	if (signalSel.q == 3){iopin[88] = 1; iopin[89] = 1;}
+}
+else if (schakelaar.q == 45){
+	if (signalSel.q == 0){iopin[90] = 0; iopin[91] = 0;}
+	if (signalSel.q == 1){iopin[90] = 0; iopin[91] = 1;}
+	if (signalSel.q == 2){iopin[90] = 1; iopin[91] = 0;}
+	if (signalSel.q == 3){iopin[90] = 1; iopin[91] = 1;}
+}
+else if (schakelaar.q == 46){
+	if (signalSel.q == 0){iopin[92] = 0; iopin[93] = 0;}
+	if (signalSel.q == 1){iopin[92] = 0; iopin[93] = 1;}
+	if (signalSel.q == 2){iopin[92] = 1; iopin[93] = 0;}
+	if (signalSel.q == 3){iopin[92] = 1; iopin[93] = 1;}
+}
+else if (schakelaar.q == 47){
+	if (signalSel.q == 0){iopin[94] = 0; iopin[95] = 0;}
+	if (signalSel.q == 1){iopin[94] = 0; iopin[95] = 1;}
+	if (signalSel.q == 2){iopin[94] = 1; iopin[95] = 0;}
+	if (signalSel.q == 3){iopin[94] = 1; iopin[95] = 1;}
+}
+else if (schakelaar.q == 48){
+	if (signalSel.q == 0){iopin[96] = 0; iopin[97] = 0;}
+	if (signalSel.q == 1){iopin[96] = 0; iopin[97] = 1;}
+	if (signalSel.q == 2){iopin[96] = 1; iopin[97] = 0;}
+	if (signalSel.q == 3){iopin[96] = 1; iopin[97] = 1;}
+}
+else if (schakelaar.q == 49){
+	if (signalSel.q == 0){iopin[98] = 0; iopin[99] = 0;}
+	if (signalSel.q == 1){iopin[98] = 0; iopin[99] = 1;}
+	if (signalSel.q == 2){iopin[98] = 1; iopin[99] = 0;}
+	if (signalSel.q == 3){iopin[98] = 1; iopin[99] = 1;}
+}
