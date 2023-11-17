@@ -681,18 +681,12 @@ entry_num2 = tk.Entry(signal_frame)
 entry_num2.pack(side="left")
 
 def reset_all():
-    try:
-        open_all_serial_ports()
-        for serialconnection in ser:
-            serialconnection.write(11111111111111111)#TO DO: UITVOGELEN HOE DEZE SHIT OOK ALWEER WERKT
-        close_all_serial_ports()
-        # Werk de kleur van de vierkanten bij voor alle vierkanten met de oude kleur
-        for i in range(len(current_square_colors)):
-            canvas.itemconfig(square_widgets[i], fill=COLORS[0])
-            current_square_colors[i] = COLORS[0]
-    except Exception as e:
-        messagebox.showerror("Error", f"Error: {str(e)}")
-        log_message(f"Error: {str(e)}")
+    global file_path, converted_data
+    file_path = '.vscode\\resetAll.csv'
+    file_path_temp = file_path
+    converted_data = 0
+    convert_data_from_csv()
+    file_path = file_path_temp
 
 button_frame = tk.Frame(left_frame, bg="white")
 button_frame.pack(pady=(5,20))
