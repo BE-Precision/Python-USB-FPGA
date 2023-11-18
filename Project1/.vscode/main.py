@@ -239,7 +239,7 @@ def convert_data(num1, num2):
     binary_num2 = format(num2, '02b')  # Zorg voor een binaire reeks van 2 bits
 
     # Wissel de laatste twee bits van binary_num2
-    binary_num2 = binary_num2[-1] + binary_num2[0]
+    #binary_num2 = binary_num2[-1] + binary_num2[0]
 
     combined_binary = binary_num1 + binary_num2
 
@@ -682,7 +682,7 @@ entry_num2.pack(side="left")
 
 def reset_all():
     global file_path, converted_data
-    file_path = '.vscode\\resetAll.csv'
+    file_path = 'Project1\.vscode\\resetAll.csv'
     file_path_temp = file_path
     converted_data = 0
     convert_data_from_csv()
