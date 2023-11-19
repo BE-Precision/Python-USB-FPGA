@@ -688,11 +688,11 @@ def reset_all(signal_number):
         colorList.clear()
         open_all_serial_ports()
 
-        for i in grid_size:
+        for i in range(grid_size):
             moduleNumber = int(i/group_size)
-            ser[moduleNumber].write(convert_data(i, signal_number)
+            ser[moduleNumber].write(convert_data(i, int(signal_number)))
             updateList.append(i)
-            colorList.append(signal_number)
+            colorList.append(int(signal_number))
             
         end_time = time.time()  # Stop the timer
         elapsed_time = end_time - start_time
@@ -717,15 +717,25 @@ button_frame.pack(pady=(5,20))
 button_send_manual = tk.Button(button_frame, text="Send Manual Data", command=send_manual_data)
 button_send_manual.pack(side="left")
 
+def on_selection_change(event=None):
+    tooltip5 = Tooltip(reset_all_button, f"This will reset all switches to signal {signal_dropdown.get()}.")
+    tooltips2.append(tooltip5)
+
+signals = ["0","1","2","3"]
+signal_dropdown = ttk.Combobox(button_frame, values=signals, state="readonly", width=2)
+signal_dropdown.bind("<<ComboboxSelected>>", on_selection_change)
+
+def reset():
+    reset_all(signal_dropdown.get())
+
 # Create a button to send manual data
-reset_all_button = tk.Button(button_frame, text="Reset All", command=reset_all(signal_dropdown.get())
+reset_all_button = tk.Button(button_frame, text="Set All", command=reset)
 reset_all_button.pack(side="left", padx=(20,5))
 
-signals[0,1,2,3]
-signal_dropdown = ttk.Combobox(button_frame, textvariable=signals, state="readonly")
 signal_dropdown.pack(side="left")
+signal_dropdown.current(0)
 
-tooltip5 = Tooltip(reset_all_button, f"This will reset all switches to signal {signal_dropdown.get()}.")
+tooltip5 = Tooltip(reset_all_button, f"This will set all switches to signal {signal_dropdown.get()}.")
 tooltips2.append(tooltip5)
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
