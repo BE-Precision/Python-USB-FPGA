@@ -239,7 +239,7 @@ def convert_data(num1, num2):
     binary_num2 = format(num2, '02b')  # Zorg voor een binaire reeks van 2 bits
 
     # Wissel de laatste twee bits van binary_num2
-    binary_num2 = binary_num2[-1] + binary_num2[0]
+    #binary_num2 = binary_num2[-1] + binary_num2[0]
 
     combined_binary = binary_num1 + binary_num2
 
@@ -680,14 +680,36 @@ label_num2.pack(side="left")
 entry_num2 = tk.Entry(signal_frame)
 entry_num2.pack(side="left")
 
-def reset_all():
-    global file_path, converted_data
-    file_path = '.vscode\\resetAll.csv'
-    file_path_temp = file_path
-    converted_data = 0
-    convert_data_from_csv()
-    file_path = file_path_temp
+def reset_all(signal_number):
+    try:
+        global group_size, updateList, colorList, ser_ports, converted_data
+        start_time = time.time()  # Start the timer
+        updateList.clear()
+        colorList.clear()
+        open_all_serial_ports()
 
+        for i in range(grid_size):
+            moduleNumber = int(i/group_size)
+            ser[moduleNumber].write(convert_data(i, int(signal_number)))
+            updateList.append(i)
+            colorList.append(int(signal_number))
+            
+        end_time = time.time()  # Stop the timer
+        elapsed_time = end_time - start_time
+        label1.config(text=f"Time elapsed: {elapsed_time}")
+        log_message(f"Time elapsed: {elapsed_time}")
+        close_all_serial_ports()
+        if var2.get() == 1:
+            update_square_colors()
+    except IndexError:
+        messagebox.showerror("Error", f"COM Port for module {moduleNumber} already used")
+        log_message(f"Error: COM Port for module {moduleNumber} already used")
+    except Exception as e:
+        messagebox.showerror("Error", f"Error: {str(e)}")
+        log_message(f"Error: {str(e)}")
+        ser.clear()
+        open_ports.clear()
+        
 button_frame = tk.Frame(left_frame, bg="white")
 button_frame.pack(pady=(5,20))
 
@@ -695,10 +717,25 @@ button_frame.pack(pady=(5,20))
 button_send_manual = tk.Button(button_frame, text="Send Manual Data", command=send_manual_data)
 button_send_manual.pack(side="left")
 
+def on_selection_change(event=None):
+    tooltip5 = Tooltip(reset_all_button, f"This will reset all switches to signal {signal_dropdown.get()}.")
+    tooltips2.append(tooltip5)
+
+signals = ["0","1","2","3"]
+signal_dropdown = ttk.Combobox(button_frame, values=signals, state="readonly", width=2)
+signal_dropdown.bind("<<ComboboxSelected>>", on_selection_change)
+
+def reset():
+    reset_all(signal_dropdown.get())
+
 # Create a button to send manual data
-reset_all_button = tk.Button(button_frame, text="Reset All", command=reset_all)
-reset_all_button.pack(side="left", padx=20)
-tooltip5 = Tooltip(reset_all_button, "This will reset all switches to signal 0.")
+reset_all_button = tk.Button(button_frame, text="Set All", command=reset)
+reset_all_button.pack(side="left", padx=(20,5))
+
+signal_dropdown.pack(side="left")
+signal_dropdown.current(0)
+
+tooltip5 = Tooltip(reset_all_button, f"This will set all switches to signal {signal_dropdown.get()}.")
 tooltips2.append(tooltip5)
 
 # Voeg een blauwe balk toe aan de bovenkant van left_frame
