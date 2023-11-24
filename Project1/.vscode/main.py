@@ -31,7 +31,7 @@ def update_com_ports():
     com_ports = get_available_com_ports()
     
     if com_ports:
-        for com_port_dropdown in dropdown_menus:
+        for com_port_dropdown in dropdown_menus[:modules]:
             # Ophalen van de huidige selectie voor elk dropdown-menu
             current_selection = com_port_dropdown.get()
             
@@ -106,7 +106,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open("Project1\.vscode\settings.json", "w") as json_file:
+        with open(".vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -117,7 +117,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
 
     try:
-        with open("Project1\.vscode\settings.json", "r") as json_file:
+        with open(".vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -442,7 +442,7 @@ def switch_to_screen3():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
+root.iconbitmap(".vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -1074,7 +1074,7 @@ update_modules()
 def saveComToJSON():
     comPortsFromDropdown = []
     comPortsFromDropdown.clear()
-    for i in range(120):
+    for i in range(modules):
         comPortsFromDropdown.append(get_com_port_for_module(i))
 
     file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
@@ -1090,26 +1090,28 @@ def saveComToJSON():
 
 def loadComFromJSON():
     global loaded
+    global modules
     loaded = 0
     file_path=filedialog.askopenfilename()
     comList = []
-    try:
-        with open(file_path, "r") as json_file:
-            comList.clear()
-            comList = json.load(json_file)
-        messagebox.showinfo("Settings are loaded", "Settings are loaded")
-        log_message("COM port settings are loaded")
-    except Exception as e:
-        loaded = 0
-        messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
-        log_message(f"An error occured when loading: {str(e)}")
+    if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".json"):
+        try:
+            with open(file_path, "r") as json_file:
+                comList.clear()
+                comList = json.load(json_file)
+            messagebox.showinfo("Settings are loaded", "Settings are loaded")
+            log_message("COM port settings are loaded")
+        except Exception as e:
+            loaded = 0
+            messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
+            log_message(f"An error occured when loading: {str(e)}")
 
-    i = 0
-    for com_port_dropdown in dropdown_menus:
-        com_port_dropdown.set(comList[i])
-        i = i+1
-    loaded = 1
-    update_com_ports()
+        i = 0
+        for com_port_dropdown in dropdown_menus[:modules]:
+            com_port_dropdown.set(comList[i])
+            i = i+1
+        loaded = 1
+        update_com_ports()
 
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
