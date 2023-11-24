@@ -1,7 +1,7 @@
 {
     "grid_columns": 10,
     "group_size": 50,
-    "modules": 50,
+    "modules": 6,
     "square_size": 30,
     "COLORS": [
         "#00ff80",

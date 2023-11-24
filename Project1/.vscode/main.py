@@ -64,6 +64,15 @@ def get_com_port_for_module(module_number):
         return 'Wrong COM'
     else:
         return com_port_dropdown.get()
+    
+def get_com_port_for_module2(module_number):
+    # Haal de index op van de module in de module_frames-lijst
+    index = module_number % len(module_frames2)
+    com_port_dropdown = module_frames2[index][1]
+    if (com_port_dropdown.get() == ''):
+        return 'Wrong COM'
+    else:
+        return com_port_dropdown.get()
 
 opened_serial_ports = [None] * 256  # Maak een lijst met 256 lege waarden om COM-poorten bij te houden
 
@@ -1153,7 +1162,7 @@ def saveComToJSON(frameNumber):
         comPortsFromDropdown2 = []
         comPortsFromDropdown2.clear()
         for i in range(modules):
-            comPortsFromDropdown2.append(get_com_port_for_module(i))
+            comPortsFromDropdown2.append(get_com_port_for_module2(i))
 
         file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
         try:
@@ -1220,26 +1229,26 @@ frame_button2.pack()
 def saveComToJSON1():
     saveComToJSON(1)
 
-SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON1)
-SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
+SaveComToJsonBtn1 = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON1)
+SaveComToJsonBtn1.pack(pady=10, padx=(400,10), side="left")
 
 def loadComFromJSON1():
     loadComFromJSON(1)
 
-LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON1)
-LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
+LoadComFromJsonBtn1 = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON1)
+LoadComFromJsonBtn1.pack(pady=10, padx=(10,400), side="left")
 
 def saveComToJSON2():
     saveComToJSON(2)
 
-SaveComToJsonBtn = tk.Button(frame_button2, text="Save to JSON", command=saveComToJSON2)
-SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
+SaveComToJsonBtn2 = tk.Button(frame_button2, text="Save to JSON", command=saveComToJSON2)
+SaveComToJsonBtn2.pack(pady=10, padx=(400,10), side="left")
 
 def loadComFromJSON2():
     loadComFromJSON(2)
 
-LoadComFromJsonBtn = tk.Button(frame_button2, text="Load from JSON", command=loadComFromJSON2)
-LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
+LoadComFromJsonBtn2 = tk.Button(frame_button2, text="Load from JSON", command=loadComFromJSON2)
+LoadComFromJsonBtn2.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
 update_parameters()
