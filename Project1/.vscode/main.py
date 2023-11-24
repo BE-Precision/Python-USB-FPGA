@@ -1082,47 +1082,84 @@ def update_modules():
 
 update_modules()
 
-def saveComToJSON():
-    comPortsFromDropdown = []
-    comPortsFromDropdown.clear()
-    for i in range(modules):
-        comPortsFromDropdown.append(get_com_port_for_module(i))
+def saveComToJSON(frameNumber):
+    if frameNumber == 1:
+        comPortsFromDropdown = []
+        comPortsFromDropdown.clear()
+        for i in range(modules):
+            comPortsFromDropdown.append(get_com_port_for_module(i))
 
-    file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
-    try:
-        with open(file_path, "w") as json_file:
-            json.dump(comPortsFromDropdown, json_file)
-        messagebox.showinfo("Settings are saved", "COM port settings are saved")
-        log_message("COM port settings saved")
-    except Exception as e:
-        messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
-        log_message(f"An error occured when saving: {str(e)}")
-    return 0
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
+        try:
+            with open(file_path, "w") as json_file:
+                json.dump(comPortsFromDropdown, json_file)
+            messagebox.showinfo("Settings are saved", "COM port settings are saved")
+            log_message("COM port settings saved")
+        except Exception as e:
+            messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+            log_message(f"An error occured when saving: {str(e)}")
+        return 0
+    if frameNumber == 2:
+        comPortsFromDropdown2 = []
+        comPortsFromDropdown2.clear()
+        for i in range(modules):
+            comPortsFromDropdown2.append(get_com_port_for_module(i))
 
-def loadComFromJSON():
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
+        try:
+            with open(file_path, "w") as json_file:
+                json.dump(comPortsFromDropdown2, json_file)
+            messagebox.showinfo("Settings are saved", "COM port settings are saved")
+            log_message("COM port settings saved")
+        except Exception as e:
+            messagebox.showerror("Error while saving", f"An error occured when saving: {str(e)}")
+            log_message(f"An error occured when saving: {str(e)}")
+        return 0
+
+
+def loadComFromJSON(frameNumber):
     global loaded
     global modules
     loaded = 0
     file_path=filedialog.askopenfilename()
     comList = []
-    if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".json"):
-        try:
-            with open(file_path, "r") as json_file:
-                comList.clear()
-                comList = json.load(json_file)
-            messagebox.showinfo("Settings are loaded", "Settings are loaded")
-            log_message("COM port settings are loaded")
-        except Exception as e:
-            loaded = 0
-            messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
-            log_message(f"An error occured when loading: {str(e)}")
+    if frameNumber == 1:
+        if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".json"):
+            try:
+                with open(file_path, "r") as json_file:
+                    comList.clear()
+                    comList = json.load(json_file)
+                messagebox.showinfo("Settings are loaded", "Settings are loaded")
+                log_message("COM port settings are loaded")
+            except Exception as e:
+                loaded = 0
+                messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
+                log_message(f"An error occured when loading: {str(e)}")
 
-        i = 0
-        for com_port_dropdown in dropdown_menus[:modules]:
-            com_port_dropdown.set(comList[i])
-            i = i+1
-        loaded = 1
-        update_com_ports()
+            i = 0
+            for com_port_dropdown in dropdown_menus[:modules]:
+                com_port_dropdown.set(comList[i])
+                i = i+1
+            loaded = 1
+    if frameNumber == 2:
+        if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".json"):
+            try:
+                with open(file_path, "r") as json_file:
+                    comList.clear()
+                    comList = json.load(json_file)
+                messagebox.showinfo("Settings are loaded", "Settings are loaded")
+                log_message("COM port settings are loaded")
+            except Exception as e:
+                loaded = 0
+                messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
+                log_message(f"An error occured when loading: {str(e)}")
+
+            i = 0
+            for com_port_dropdown2 in dropdown_menus2[:modules]:
+                com_port_dropdown2.set(comList[i])
+                i = i+1
+            loaded = 1
+    update_com_ports()
 
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
