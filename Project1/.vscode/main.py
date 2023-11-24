@@ -106,7 +106,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open(".vscode\settings.json", "w") as json_file:
+        with open("Project1\.vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -117,7 +117,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
 
     try:
-        with open(".vscode\settings.json", "r") as json_file:
+        with open("Project1\.vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -442,7 +442,7 @@ def switch_to_screen3():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap(".vscode\BEPTLogo.ico")
+root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -1040,6 +1040,51 @@ top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
 text_label.pack(side="left", padx=10)
 
+# Maak scherm 3
+screen3 = Frame(root)
+screen3.grid_remove()
+
+# Create Frame for X Scrollbar
+sec3 = Frame(screen3)
+sec3.pack(fill=X, side=BOTTOM)
+# Create A Canvas
+my_canvas3 = Canvas(screen3)
+my_canvas3.pack(side=LEFT, fill=BOTH, expand=1)
+# Add A Scrollbars to Canvas
+x_scrollbar3 = ttk.Scrollbar(sec3, orient=HORIZONTAL, command=my_canvas3.xview)
+x_scrollbar3.pack(side=BOTTOM, fill=X)
+y_scrollbar3 = ttk.Scrollbar(screen3, orient=VERTICAL, command=my_canvas3.yview)
+y_scrollbar3.pack(side=RIGHT, fill=Y)
+# Configure the canvas
+my_canvas3.configure(xscrollcommand=x_scrollbar.set)
+my_canvas3.configure(yscrollcommand=y_scrollbar.set)
+my_canvas3.bind("<Configure>", lambda e: my_canvas3.config(scrollregion=my_canvas3.bbox(ALL)))
+# Create Another Frame INSIDE the Canvas
+big_frame3 = Frame(my_canvas3, bg="white")
+big_frame3.grid()
+
+# Voeg een zwarte balk toe aan de bovenkant van big_frame
+black_frame = tk.Frame(big_frame3, bg="grey20")
+black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
+text_label.pack(side="right", padx=10)
+button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+button1.pack(side="left")
+button2.pack(side="left")
+button3.pack(side="left")
+
+
+# Voeg een blauwe balk toe aan de bovenkant van right_frame
+top_frame = tk.Frame(big_frame3, bg="RoyalBlue4")
+top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10)
+
 # Maak een frame voor de module dropdowns
 modules_frame = tk.Frame(big_frame2, bg="white")
 modules_frame.pack()
@@ -1072,6 +1117,9 @@ def COMDropDown(frame):
             elif frame == modules_frame2:
                 module_frames2.append((label_module, com_port_dropdown))
                 dropdown_menus2.append(com_port_dropdown)
+
+COMDropDown(modules_frame)
+COMDropDown(modules_frame2)
 
 def update_modules():
     for i in range(modules, 120):
@@ -1132,68 +1180,6 @@ SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Maak scherm 3
-screen3 = Frame(root)
-screen3.grid_remove()
-
-# Create Frame for X Scrollbar
-sec3 = Frame(screen3)
-sec3.pack(fill=X, side=BOTTOM)
-# Create A Canvas
-my_canvas3 = Canvas(screen3)
-my_canvas3.pack(side=LEFT, fill=BOTH, expand=1)
-# Add A Scrollbars to Canvas
-x_scrollbar3 = ttk.Scrollbar(sec3, orient=HORIZONTAL, command=my_canvas3.xview)
-x_scrollbar3.pack(side=BOTTOM, fill=X)
-y_scrollbar3 = ttk.Scrollbar(screen3, orient=VERTICAL, command=my_canvas3.yview)
-y_scrollbar3.pack(side=RIGHT, fill=Y)
-# Configure the canvas
-my_canvas3.configure(xscrollcommand=x_scrollbar.set)
-my_canvas3.configure(yscrollcommand=y_scrollbar.set)
-my_canvas3.bind("<Configure>", lambda e: my_canvas3.config(scrollregion=my_canvas3.bbox(ALL)))
-# Create Another Frame INSIDE the Canvas
-big_frame3 = Frame(my_canvas3, bg="white")
-big_frame3.grid()
-
-# Voeg een zwarte balk toe aan de bovenkant van big_frame
-black_frame = tk.Frame(big_frame3, bg="grey20")
-black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
-
-# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
-text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
-text_label.pack(side="right", padx=10)
-button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
-button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
-button1.pack(side="left")
-button2.pack(side="left")
-button3.pack(side="left")
-
-
-# Voeg een blauwe balk toe aan de bovenkant van right_frame
-top_frame = tk.Frame(big_frame3, bg="RoyalBlue4")
-top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
-
-text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
-text_label.pack(side="left", padx=10)
 
 update_com_ports_periodically()
 update_parameters()
