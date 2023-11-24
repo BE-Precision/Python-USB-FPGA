@@ -279,7 +279,7 @@ def send_and_receive_data():
 
         for i in range(len(converted_data_list)):
             moduleNumber = module_list[i]
-            ser[0].write(converted_data_list[i])
+            ser[moduleNumber].write(converted_data_list[i])
             if updateList2[i] in updateList:
                 # Vind de positie van num1 in updateList
                 index = updateList.index(updateList2[i])
