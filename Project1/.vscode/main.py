@@ -1217,7 +1217,10 @@ frame_button.pack()
 frame_button2 = tk.Frame(big_frame3, bg="white")
 frame_button2.pack()
 
-SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
+def saveComToJSON1():
+    saveComToJSON(1)
+
+SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON1)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
 def loadComFromJSON1():
@@ -1226,10 +1229,16 @@ def loadComFromJSON1():
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON1)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
-SaveComToJsonBtn = tk.Button(frame_button2, text="Save to JSON", command=saveComToJSON)
+def saveComToJSON2():
+    saveComToJSON(2)
+
+SaveComToJsonBtn = tk.Button(frame_button2, text="Save to JSON", command=saveComToJSON2)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
-LoadComFromJsonBtn = tk.Button(frame_button2, text="Load from JSON", command=loadComFromJSON)
+def loadComFromJSON2():
+    loadComFromJSON(2)
+
+LoadComFromJsonBtn = tk.Button(frame_button2, text="Load from JSON", command=loadComFromJSON2)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
