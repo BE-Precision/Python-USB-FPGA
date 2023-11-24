@@ -412,16 +412,32 @@ def resize_window2():
     # Pas de grootte van het venster aan
     root.geometry(f"{width}x{height}")
 
+def resize_window3():
+    # Haal de gewenste breedte en hoogte van main_frame op
+    width = big_frame3.winfo_reqwidth()+20
+    height = big_frame3.winfo_reqheight()+20
+    
+    # Pas de grootte van het venster aan
+    root.geometry(f"{width}x{height}")
+
 def switch_to_screen1():
     screen2.pack_forget()
+    screen3.pack_forget()
     main_frame.pack()
     big_frame.pack()
     resize_window1()
 
 def switch_to_screen2():
     main_frame.pack_forget()
+    screen3.pack_forget()
     screen2.pack()
     resize_window2()
+
+def switch_to_screen3():
+    main_frame.pack_forget()
+    screen2.pack_forget()
+    screen3.pack()
+    resize_window3()
 
 # Create the main window
 root = tk.Tk()
@@ -523,9 +539,11 @@ custom_font2 = ("Microsoft JhengHei UI", 15, "bold")
 text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
-button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
+button3.pack(side="left")
 
 # Voeg een frame toe voor de linkerkant
 left_frame = Frame(big_frame, bg="white")
@@ -1008,9 +1026,11 @@ black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaa
 text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
-button2 = tk.Button(black_frame, text="COM Port", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
+button3.pack(side="left")
 
 
 # Voeg een blauwe balk toe aan de bovenkant van right_frame
@@ -1100,8 +1120,70 @@ SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Maak scherm 3
+screen3 = Frame(root)
+screen3.grid_remove()
+
+# Create Frame for X Scrollbar
+sec3 = Frame(screen3)
+sec3.pack(fill=X, side=BOTTOM)
+# Create A Canvas
+my_canvas3 = Canvas(screen3)
+my_canvas3.pack(side=LEFT, fill=BOTH, expand=1)
+# Add A Scrollbars to Canvas
+x_scrollbar3 = ttk.Scrollbar(sec3, orient=HORIZONTAL, command=my_canvas3.xview)
+x_scrollbar3.pack(side=BOTTOM, fill=X)
+y_scrollbar3 = ttk.Scrollbar(screen3, orient=VERTICAL, command=my_canvas3.yview)
+y_scrollbar3.pack(side=RIGHT, fill=Y)
+# Configure the canvas
+my_canvas3.configure(xscrollcommand=x_scrollbar.set)
+my_canvas3.configure(yscrollcommand=y_scrollbar.set)
+my_canvas3.bind("<Configure>", lambda e: my_canvas3.config(scrollregion=my_canvas3.bbox(ALL)))
+# Create Another Frame INSIDE the Canvas
+big_frame3 = Frame(my_canvas3, bg="white")
+big_frame3.grid()
+
+# Voeg een zwarte balk toe aan de bovenkant van big_frame
+black_frame = tk.Frame(big_frame3, bg="grey20")
+black_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+# Voeg witte tekst toe aan de zwarte balk aan de rechterkant
+text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="grey20", font=custom_font)
+text_label.pack(side="right", padx=10)
+button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
+button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+button1.pack(side="left")
+button2.pack(side="left")
+button3.pack(side="left")
+
+
+# Voeg een blauwe balk toe aan de bovenkant van right_frame
+top_frame = tk.Frame(big_frame3, bg="RoyalBlue4")
+top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
+
+text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label.pack(side="left", padx=10)
+
 update_com_ports_periodically()
 update_parameters()
 save_button.config(state=DISABLED)
+
 # Start the main loop
 root.mainloop()
