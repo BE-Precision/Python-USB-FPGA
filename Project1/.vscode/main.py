@@ -1044,23 +1044,34 @@ text_label.pack(side="left", padx=10)
 modules_frame = tk.Frame(big_frame2, bg="white")
 modules_frame.pack()
 
+# Maak een frame voor de module dropdowns
+modules_frame2 = tk.Frame(big_frame3, bg="white")
+modules_frame2.pack()
+
 # Voeg labels en dropdown-menu's toe voor modules
 
 module_frames = []
 dropdown_menus = []
+module_frames2 = []
+dropdown_menus2 = []
 
-for i in range(6):
-    frame_com2 = tk.Frame(modules_frame, bg="white")
-    frame_com2.pack(side="left")
-    for j in range(20):
-        frame_com = tk.Frame(frame_com2, bg="white")
-        frame_com.pack(padx=5, pady=5)  #Gebruik .grid om frames in het raster te plaatsen
-        label_module = tk.Label(frame_com, text=f"Module {i*20 + j}", bg="white")  # Berekent de juiste module-index
-        label_module.pack(side="left")
-        com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
-        com_port_dropdown.pack(side="left")
-        module_frames.append((label_module, com_port_dropdown))
-        dropdown_menus.append(com_port_dropdown)
+def COMDropDown(frame):
+    for i in range(6):
+        frame_com2 = tk.Frame(frame, bg="white")
+        frame_com2.pack(side="left")
+        for j in range(20):
+            frame_com = tk.Frame(frame_com2, bg="white")
+            frame_com.pack(padx=5, pady=5)  #Gebruik .grid om frames in het raster te plaatsen
+            label_module = tk.Label(frame_com, text=f"Module {i*20 + j}", bg="white")  # Berekent de juiste module-index
+            label_module.pack(side="left")
+            com_port_dropdown = ttk.Combobox(frame_com, values=get_available_com_ports(), state="readonly")
+            com_port_dropdown.pack(side="left")
+            if frame == modules_frame:
+                module_frames.append((label_module, com_port_dropdown))
+                dropdown_menus.append(com_port_dropdown)
+            elif frame == modules_frame2:
+                module_frames2.append((label_module, com_port_dropdown))
+                dropdown_menus2.append(com_port_dropdown)
 
 def update_modules():
     for i in range(modules, 120):
@@ -1121,6 +1132,7 @@ SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
+
 
 
 
