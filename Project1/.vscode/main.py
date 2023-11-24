@@ -106,7 +106,7 @@ def save_parameters_to_json():
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open("Project1\.vscode\settings.json", "w") as json_file:
+        with open(".vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -117,7 +117,7 @@ def load_parameters_from_json():
     global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
 
     try:
-        with open("Project1\.vscode\settings.json", "r") as json_file:
+        with open(".vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -442,7 +442,7 @@ def switch_to_screen3():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
+root.iconbitmap(".vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -1215,7 +1215,10 @@ frame_button.pack()
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
-LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON)
+def loadComFromJSON1():
+    loadComFromJSON(1)
+
+LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON1)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
