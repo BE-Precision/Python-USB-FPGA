@@ -1124,9 +1124,11 @@ COMDropDown(modules_frame2)
 def update_modules():
     for i in range(modules, 120):
         dropdown_menus[i].config(state="disabled")
+        dropdown_menus2[i].config(state="disabled")
     
     for i in range(modules):
         dropdown_menus[i].config(state="readonly")
+        dropdown_menus2[i].config(state="readonly")
 
 update_modules()
 
@@ -1212,6 +1214,9 @@ def loadComFromJSON(frameNumber):
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
 
+frame_button2 = tk.Frame(big_frame3, bg="white")
+frame_button2.pack()
+
 SaveComToJsonBtn = tk.Button(frame_button, text="Save to JSON", command=saveComToJSON)
 SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
 
@@ -1219,6 +1224,12 @@ def loadComFromJSON1():
     loadComFromJSON(1)
 
 LoadComFromJsonBtn = tk.Button(frame_button, text="Load from JSON", command=loadComFromJSON1)
+LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
+
+SaveComToJsonBtn = tk.Button(frame_button2, text="Save to JSON", command=saveComToJSON)
+SaveComToJsonBtn.pack(pady=10, padx=(400,10), side="left")
+
+LoadComFromJsonBtn = tk.Button(frame_button2, text="Load from JSON", command=loadComFromJSON)
 LoadComFromJsonBtn.pack(pady=10, padx=(10,400), side="left")
 
 update_com_ports_periodically()
