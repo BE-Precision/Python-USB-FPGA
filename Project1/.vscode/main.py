@@ -234,10 +234,10 @@ def selectFile():
     file_path = filedialog.askopenfilename()
     if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".csv"):
         file_label.config(text=f"Selected file: {os.path.basename(file_path)}")
-        send_button.config(state=tk.NORMAL)  # Activeer de "convert data" knop
+        send_button.config(state=tk.NORMAL)  # Activeer de "send data" knop
     else:
         file_label.config(text="Selected file: Not yet selected")
-        send_button.config(state=tk.DISABLED)  # Deactiveer de "convert data" knop als er geen bestand is geselecteerd
+        send_button.config(state=tk.DISABLED)  # Deactiveer de "send data" knop als er geen bestand is geselecteerd
         if file_path:
             messagebox.showerror("Error", "Select a valid CSV file")
             log_message("Error: Select a valid CSV file")
@@ -246,9 +246,6 @@ def convert_data(num1, num2):
     # Zet de getallen om naar binaire representaties
     binary_num1 = format(num1 % group_size, 'b')
     binary_num2 = format(num2, '02b')  # Zorg voor een binaire reeks van 2 bits
-
-    # Wissel de laatste twee bits van binary_num2
-    #binary_num2 = binary_num2[-1] + binary_num2[0]
 
     combined_binary = binary_num1 + binary_num2
 
