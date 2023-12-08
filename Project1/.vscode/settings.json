@@ -1,7 +1,7 @@
 {
     "grid_columns": 10,
     "group_size": 50,
-    "modules": 6,
+    "modules": 1,
     "square_size": 30,
     "COLORS": [
         "#00ff80",
@@ -10,8 +10,9 @@
         "purple"
     ],
     "width": 1012,
-    "height": 663,
+    "height": 688,
     "var": 1,
     "var2": 1,
-    "var3": 1
+    "var3": 1,
+    "var4": 0
 }

@@ -13,6 +13,7 @@ import time
 from serial.tools import list_ports
 import os
 import json
+import math
 
 global loaded
 loaded = 0
@@ -76,13 +77,16 @@ def get_com_port_for_module2(module_number):
 
 opened_serial_ports = [None] * 256  # Maak een lijst met 256 lege waarden om COM-poorten bij te houden
 
-def open_serial_port_for_switch(switch_number):
+def open_serial_port_for_switch(switch_number, com):
     global group_size
     # Bepaal bij welke module de schakelaar hoort
     module_number = switch_number // group_size
 
     # Haal de COM-poort op voor de module
-    com_port = get_com_port_for_module(module_number)
+    if(com == 1):
+        com_port = get_com_port_for_module(module_number)
+    elif(com == 2):
+        com_port = get_com_port_for_module2(module_number)
 
     if com_port:
         # Als de COM-poort nog niet is geopend, open deze
@@ -111,11 +115,12 @@ def save_parameters_to_json():
         "height": height,
         "var": var.get(),
         "var2": var2.get(),
-        "var3": var3.get()
+        "var3": var3.get(),
+        "var4": var4.get()
     }
     save_button.config(state=tk.DISABLED)
     try:
-        with open(".vscode\settings.json", "w") as json_file:
+        with open("Project1\.vscode\settings.json", "w") as json_file:
             json.dump(parameters, json_file, indent=4)
         messagebox.showinfo("Settings are saved", "Settings are saved")
     except Exception as e:
@@ -123,10 +128,10 @@ def save_parameters_to_json():
         log_message(f"An error occured when saving: {str(e)}")
 
 def load_parameters_from_json():
-    global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value
+    global grid_columns, group_size, modules, square_size, COLORS, width, height, var2_value, var3_value, var_value, var4_value
 
     try:
-        with open(".vscode\settings.json", "r") as json_file:
+        with open("Project1\.vscode\settings.json", "r") as json_file:
             parameters = json.load(json_file)
             grid_columns = parameters.get("grid_columns", grid_columns)
             group_size = parameters.get("group_size", group_size)
@@ -138,13 +143,16 @@ def load_parameters_from_json():
             var_value = parameters.get("var", 0)
             var2_value = parameters.get("var2", 0)
             var3_value = parameters.get("var3", 0)
+            var4_value = parameters.get("var4", 0)
     except Exception as e:
         messagebox.showerror("Error while loading", f"An error occured while loading the settings: {str(e)}")
 
 load_parameters_from_json()
 
 ser = [] * group_size
+ser2 = [] * group_size
 open_ports = []
+open_ports2 = []
 
 # Bereken het aantal groepen
 num_groups = grid_size // group_size
@@ -263,28 +271,66 @@ def convert_data(num1, num2):
 
     return myBytes
 
+binary_data_list = []
+
+def bytes_to_binary_list(data):
+    binary_list = []
+    for byte in data:
+        binary_list.extend([int(bit) for bit in f"{byte:08b}"])
+    return binary_list
+
+def receive_data():
+    global ser2
+    binary_data_list.clear()
+    open_all_serial_ports(2)
+    for i in range(modules):
+        ser2[i].write(b'1')
+        data = ser2[i].read(int(math.ceil(group_size / 8)))
+        while not data:
+            data = ser2[i].read(int(math.ceil(group_size / 8)))
+        
+        # Converteer de ontvangen bytes naar binaire getallen
+        binary_data = bytes_to_binary_list(data)
+        binary_data_list.extend(binary_data)  # Voeg de binaire getallen toe aan de lijst
+    close_all_serial_ports(2)
+
+    binary_data_string = ''.join(map(str, binary_data_list))
+    if var.get() == 1:
+        log_message(f"Recieved data from FPGA: {binary_data_string}")
+
 # Functie om alle seriële poorten te openen
-def open_all_serial_ports():
+def open_all_serial_ports(com):
     global num_groups
     for module_number in range(modules):
-        if not open_ports.__contains__(get_com_port_for_module(module_number)):
-            open_ports.append(get_com_port_for_module(module_number))
-            ser.append(serial.Serial(get_com_port_for_module(module_number), baudrate=1843200))
+        if(com == 1):
+            if not open_ports.__contains__(get_com_port_for_module(module_number)):
+                open_ports.append(get_com_port_for_module(module_number))
+                ser.append(serial.Serial(get_com_port_for_module(module_number), baudrate=1843200))
+        elif(com == 2):
+            if not open_ports2.__contains__(get_com_port_for_module2(module_number)):
+                open_ports2.append(get_com_port_for_module2(module_number))
+                ser2.append(serial.Serial(get_com_port_for_module2(module_number), baudrate=1843200))
 
 # Functie om alle seriële poorten te sluiten
-def close_all_serial_ports():
+def close_all_serial_ports(com):
     global num_groups
-    for i, item in enumerate(open_ports):
-        ser[i].close()
-    open_ports.clear()
-    ser.clear()
+    if(com == 1):
+        for i, item in enumerate(open_ports):
+            ser[i].close()
+        open_ports.clear()
+        ser.clear()
+    elif(com == 2):
+        for i, item in enumerate(open_ports2):
+            ser[i].close()
+        open_ports2.clear()
+        ser2.clear()
 
 # Function to send and receive data in a separate thread
 def send_and_receive_data():
     try:
         global group_size, updateList, colorList, ser_ports, converted_data_list, module_list
         start_time = time.time()  # Start the timer
-        open_all_serial_ports()
+        open_all_serial_ports(1)
 
         for i in range(len(converted_data_list)):
             moduleNumber = module_list[i]
@@ -302,7 +348,7 @@ def send_and_receive_data():
         elapsed_time = end_time - start_time
         label1.config(text=f"Time elapsed: {elapsed_time}")
         log_message(f"Time elapsed: {elapsed_time}")
-        close_all_serial_ports()
+        close_all_serial_ports(1)
         if var2.get() == 1:
             update_square_colors()
     except IndexError:
@@ -374,7 +420,7 @@ def send_manual_data():
             signal_num = int(num2)
 
             if 0 <= switch_num < (grid_size) and 0 <= signal_num < len(COLORS):
-                ser = open_serial_port_for_switch(switch_num)
+                ser = open_serial_port_for_switch(switch_num, 1)
                 if switch_num in updateList:
                     # Vind de positie van num1 in updateList
                     index = updateList.index(switch_num)
@@ -392,6 +438,8 @@ def send_manual_data():
                 log_message(f"Time elapsed: {elapsed_time}")
                 if var2.get() == 1:
                     update_square_colors()
+                if var4.get() == 1:
+                    receive_data()
             else:
                 messagebox.showerror("Error", "Invalid input: Switch number or signal out of range")
                 log_message("Invalid input: Switch number or signal out of range")
@@ -451,7 +499,7 @@ def switch_to_screen3():
 # Create the main window
 root = tk.Tk()
 root.title("BE Precision Technology - Probe Card Tester")
-root.iconbitmap(".vscode\BEPTLogo.ico")
+root.iconbitmap("Project1\.vscode\BEPTLogo.ico")
 root.geometry(f"{width}x{height}")  # Set the initial window size to 1920x1080 pixels
 root.configure(bg="white")
 
@@ -549,7 +597,7 @@ text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="gre
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
 button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Receive", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
 button3.pack(side="left")
@@ -713,7 +761,7 @@ def reset_all(signal_number):
         start_time = time.time()  # Start the timer
         updateList.clear()
         colorList.clear()
-        open_all_serial_ports()
+        open_all_serial_ports(1)
 
         for i in range(grid_size):
             moduleNumber = int(i/group_size)
@@ -725,7 +773,7 @@ def reset_all(signal_number):
         elapsed_time = end_time - start_time
         label1.config(text=f"Time elapsed: {elapsed_time}")
         log_message(f"Time elapsed: {elapsed_time}")
-        close_all_serial_ports()
+        close_all_serial_ports(1)
         if var2.get() == 1:
             update_square_colors()
     except IndexError:
@@ -873,6 +921,11 @@ entry_square_size.pack(side="left")
 
 tooltip_checkbox = tk.Checkbutton(left_frame, variable=var3, text="Show Tooltips", command=toggle_tooltips, bg="white")
 tooltip_checkbox.pack(padx=(0,110))
+
+var4 = tk.IntVar(value=0)
+var4.set(var4_value)  # Set the value of the checkbox
+auto_feedback = tk.Checkbutton(left_frame, text="Output Check", variable=var4, bg="white")
+auto_feedback.pack(padx=(0,112))
 
 def rearrange_squares():
     # Herverdeel de vierkanten op het nieuwe raster
@@ -1036,7 +1089,7 @@ text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="gre
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
 button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Receive", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
 button3.pack(side="left")
@@ -1046,7 +1099,7 @@ button3.pack(side="left")
 top_frame = tk.Frame(big_frame2, bg="RoyalBlue4")
 top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 
-text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label = tk.Label(top_frame, text="COM Port Selection Send", fg="white", bg="RoyalBlue4", font=custom_font)
 text_label.pack(side="left", padx=10)
 
 # Maak scherm 3
@@ -1081,7 +1134,7 @@ text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="gre
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
 button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+button3 = tk.Button(black_frame, text="COM Port Receive", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
 button3.pack(side="left")
@@ -1091,7 +1144,7 @@ button3.pack(side="left")
 top_frame = tk.Frame(big_frame3, bg="RoyalBlue4")
 top_frame.pack(side="top", fill="x")  # Stel in dat het de hele breedte beslaat
 
-text_label = tk.Label(top_frame, text="COM Port Selection", fg="white", bg="RoyalBlue4", font=custom_font)
+text_label = tk.Label(top_frame, text="COM Port Selection Receive", fg="white", bg="RoyalBlue4", font=custom_font)
 text_label.pack(side="left", padx=10)
 
 # Maak een frame voor de module dropdowns
