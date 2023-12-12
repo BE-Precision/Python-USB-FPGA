@@ -16,7 +16,8 @@ import json
 import math
 
 global loaded
-loaded = 0
+loaded1 = 0
+loaded2 = 0
 
 # Constanten voor de kleuren
 COLORS = []
@@ -27,20 +28,25 @@ def get_available_com_ports():
     return com_ports
 
 # Functie om de lijst met COM-poorten dynamisch bij te werken
-def update_com_ports():
-    global loaded, modules
+def update_com_ports(dm):
+    global loaded1, loaded2, modules
     com_ports = get_available_com_ports()
     
     if com_ports:
-        for com_port_dropdown in dropdown_menus[:modules]:
+        for com_port_dropdown in dm[:modules]:
             # Ophalen van de huidige selectie voor elk dropdown-menu
             current_selection = com_port_dropdown.get()
             
             # Huidige selectie is niet meer beschikbaar, selecteer een nieuwe COM-poort
             if current_selection not in com_ports:
-                if loaded:
+                if loaded1 & (dm == dropdown_menus):
                     messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected. Check all connections and reload COM port settings.")
                     log_message(f"Caution! COM port {current_selection} could not be loaded, might be disconnected.")
+                    loaded1=0
+                if loaded2 & (dm == dropdown_menus2):
+                    messagebox.showerror("Caution!", f"COM port {current_selection} could not be loaded, might be disconnected. Check all connections and reload COM port settings.")
+                    log_message(f"Caution! COM port {current_selection} could not be loaded, might be disconnected.")
+                    loaded2=0
                 current_selection =  ""
             
             # Bijwerken van de dropdown-menu met de juiste waarden
@@ -49,7 +55,7 @@ def update_com_ports():
         
     else:
         # Geen beschikbare COM-poorten
-        for com_port_dropdown in dropdown_menus:
+        for com_port_dropdown in dm:
             com_port_dropdown['values'] = []
             com_port_dropdown.set("")  # Wis de huidige selectie
 
@@ -702,7 +708,8 @@ def change_signal_color(signal):
 
 # Functie om periodiek de COM-poorten bij te werken
 def update_com_ports_periodically():
-    update_com_ports()
+    update_com_ports(dropdown_menus)
+    update_com_ports(dropdown_menus2)
     root.after(1000, update_com_ports_periodically)  # Herhaal elke 5 seconden
 
 file_frame = tk.Frame(left_frame, bg="white")
@@ -1227,9 +1234,10 @@ def saveComToJSON(frameNumber):
 
 
 def loadComFromJSON(frameNumber):
-    global loaded
+    global loaded1, loaded2
     global modules
-    loaded = 0
+    loaded1 = 0
+    loaded2 = 0
     file_path=filedialog.askopenfilename()
     comList = []
     if frameNumber == 1:
@@ -1241,7 +1249,7 @@ def loadComFromJSON(frameNumber):
                 messagebox.showinfo("Settings are loaded", "Settings are loaded")
                 log_message("COM port settings are loaded")
             except Exception as e:
-                loaded = 0
+                loaded1 = 0
                 messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
                 log_message(f"An error occured when loading: {str(e)}")
 
@@ -1249,7 +1257,7 @@ def loadComFromJSON(frameNumber):
             for com_port_dropdown in dropdown_menus[:modules]:
                 com_port_dropdown.set(comList[i])
                 i = i+1
-            loaded = 1
+            loaded1 = 1
     if frameNumber == 2:
         if file_path and os.path.isfile(file_path) and file_path.lower().endswith(".json"):
             try:
@@ -1259,16 +1267,15 @@ def loadComFromJSON(frameNumber):
                 messagebox.showinfo("Settings are loaded", "Settings are loaded")
                 log_message("COM port settings are loaded")
             except Exception as e:
-                loaded = 0
+                loaded2 = 0
                 messagebox.showerror("Error while loading", f"An error occured when loading: {str(e)}")
                 log_message(f"An error occured when loading: {str(e)}")
 
             i = 0
-            for com_port_dropdown2 in dropdown_menus2[:modules]:
-                com_port_dropdown2.set(comList[i])
+            for com_port_dropdown in dropdown_menus2[:modules]:
+                com_port_dropdown.set(comList[i])
                 i = i+1
-            loaded = 1
-    update_com_ports()
+            loaded2 = 1
 
 frame_button = tk.Frame(big_frame2, bg="white")
 frame_button.pack()
