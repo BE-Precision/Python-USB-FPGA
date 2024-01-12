@@ -540,10 +540,10 @@ text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="gre
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
 button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+#button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
-button3.pack(side="left")
+#button3.pack(side="left")
 
 # Voeg een frame toe voor de linkerkant
 left_frame = Frame(big_frame, bg="white")
@@ -1027,10 +1027,10 @@ text_label = tk.Label(black_frame, text="Probe Card Tester", fg="white", bg="gre
 text_label.pack(side="right", padx=10)
 button1 = tk.Button(black_frame, text="Start", command=switch_to_screen1, bg="limegreen", font=custom_font2, fg="white")
 button2 = tk.Button(black_frame, text="COM Port Send", command=switch_to_screen2, bg="deepskyblue", font=custom_font2, fg="white")
-button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
+#button3 = tk.Button(black_frame, text="COM Port Recieve", command=switch_to_screen3, bg="deepskyblue", font=custom_font2, fg="white")
 button1.pack(side="left")
 button2.pack(side="left")
-button3.pack(side="left")
+#button3.pack(side="left")
 
 
 # Voeg een blauwe balk toe aan de bovenkant van right_frame
